@@ -22,27 +22,27 @@ class Draw:
 class AttackDrawer:
     @staticmethod
     def form_all_draws(deck: Multiset) -> Multiset:
-        result = []
+        result = Multiset()
         for card in deck:
             if card.startswith('R'):
-                result.extend(AttackDrawer.rolling_modifier_draws(deck, card))
+                result.union_update(AttackDrawer.rolling_modifier_draws(deck, card))
             else:
-                result.append(Draw((card,), 1))
-        return Multiset(result)
+                result.add(Draw((card,), 1))
+        return result
 
     @staticmethod
     def rolling_modifier_draws(deck: Multiset, card: str) -> Multiset:
-        result = []
+        result = Multiset()
         remaining_deck = AttackDrawer.subtract_from_deck(deck, card)
 
         nested_results = AttackDrawer.form_all_draws(remaining_deck)
         for nested_draw in nested_results:
-            result.append(Draw((card,) + nested_draw.cards, 1))
-        return Multiset(result)
+            result.add(Draw((card,) + nested_draw.cards, 1))
+        return result
 
     @staticmethod
     def form_all_advantage_draws(deck: Multiset) -> Multiset:
-        result = []
+        result = Multiset()
         for card in deck:
             remaining_cards = AttackDrawer.subtract_from_deck(deck, card)
             for next_card in remaining_cards:
@@ -53,10 +53,10 @@ class AttackDrawer:
                     rolling_deck = AttackDrawer.subtract_from_deck(remaining_cards, next_card)
                     rolling_draws = AttackDrawer.form_all_draws(rolling_deck)
                     for rolling_draw in rolling_draws:
-                        result.append(Draw((card, next_card) + rolling_draw.cards, 1))
+                        result.add(Draw((card, next_card) + rolling_draw.cards, 1))
                 else:
-                    result.append(Draw((card, next_card), partitions))
-        return Multiset(result)
+                    result.add(Draw((card, next_card), partitions))
+        return result
 
     @classmethod
     def subtract_from_deck(cls, deck: Multiset, card: str):
