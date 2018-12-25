@@ -16,8 +16,8 @@ def main():
     input_deck = Multiset(deck)
     with SimpleTimerContext("Generating all possible draws for deck."):
         all_possible_draws = AttackDrawer.form_all_advantage_draws(input_deck)
-    for draws in all_possible_draws:
-        print(DrawParser.make_result(draws))
+    for draw in all_possible_draws:
+        print(DrawParser.make_result(draw))
 
 
 # Final output:

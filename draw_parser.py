@@ -1,10 +1,10 @@
 from collections import Counter
 
-from attack_drawer import Draws
+from attack_drawer import Draw
 
 
 class Result:
-    def __init__(self, draws: Draws, effects):
+    def __init__(self, draws: Draw, effects):
         self.draws = draws
         self.effects = effects
 
@@ -19,7 +19,7 @@ class Result:
 
 class DrawParser:
     @classmethod
-    def make_result(cls, draws: Draws) -> Result:
+    def make_result(cls, draws: Draw) -> Result:
         effects = Counter()
         if draws.partitions == 2:
             real_draws = cls.extract_better_advantaged_draw(draws)
@@ -40,9 +40,9 @@ class DrawParser:
         card_1_number = cls.extract_number(card_1)
         card_2_number = cls.extract_number(card_2)
         if card_2_has_effect and not card_1_has_effect and card_2_number >= card_1_number:
-            real_draws = Draws([card_2], 1)
+            real_draws = Draw((card_2,), 1)
         else:
-            real_draws = Draws([card_1], 1)
+            real_draws = Draw((card_1,), 1)
         return real_draws
 
     @classmethod
