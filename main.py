@@ -1,4 +1,4 @@
-from multiset import Multiset
+from multiset import FrozenMultiset
 
 from attack_drawer import AttackDrawer
 from draw_parser import DrawParser
@@ -13,7 +13,7 @@ def main():
     deck = default_deck.copy()
     print(deck)
 
-    input_deck = Multiset(deck)
+    input_deck = FrozenMultiset(deck)
     with SimpleTimerContext("Generating all possible draws for deck."):
         all_possible_draws = AttackDrawer.form_all_advantage_draws(input_deck)
     for draw in all_possible_draws:

@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from multiset import Multiset
+from multiset import Multiset, FrozenMultiset
 
 
 class Draw:
@@ -21,19 +21,19 @@ class Draw:
 
 class AttackDrawer:
     @staticmethod
-    def form_all_draws(deck: Multiset) -> Multiset:
-        result = Multiset()
+    def form_all_draws(deck: FrozenMultiset) -> Multiset:
+        result = FrozenMultiset()
         for card in deck:
             if card.startswith('R'):
-                result.union_update(AttackDrawer.rolling_modifier_draws(deck, card))
+                result = result.combine(AttackDrawer.rolling_modifier_draws(deck, card))
             else:
-                result.add(Draw((card,), 1))
+                result = result.combine([Draw((card,), 1)])
         return result
 
     @staticmethod
-    def rolling_modifier_draws(deck: Multiset, card: str) -> Multiset:
+    def rolling_modifier_draws(deck: FrozenMultiset, card: str) -> Multiset:
         result = Multiset()
-        remaining_deck = AttackDrawer.subtract_from_deck(deck, card)
+        remaining_deck = deck.difference([card])
 
         nested_results = AttackDrawer.form_all_draws(remaining_deck)
         for nested_draw in nested_results:
@@ -41,25 +41,19 @@ class AttackDrawer:
         return result
 
     @staticmethod
-    def form_all_advantage_draws(deck: Multiset) -> Multiset:
+    def form_all_advantage_draws(deck: FrozenMultiset) -> Multiset:
         result = Multiset()
         for card in deck:
-            remaining_cards = AttackDrawer.subtract_from_deck(deck, card)
+            remaining_cards = deck.difference([card])
             for next_card in remaining_cards:
                 first_rolling = card.startswith('R')
                 second_rolling = next_card.startswith('R')
                 partitions = 1 if first_rolling or second_rolling else 2
                 if first_rolling and second_rolling:
-                    rolling_deck = AttackDrawer.subtract_from_deck(remaining_cards, next_card)
+                    rolling_deck = remaining_cards.difference([next_card])
                     rolling_draws = AttackDrawer.form_all_draws(rolling_deck)
                     for rolling_draw in rolling_draws:
                         result.add(Draw((card, next_card) + rolling_draw.cards, 1))
                 else:
                     result.add(Draw((card, next_card), partitions))
-        return result
-
-    @classmethod
-    def subtract_from_deck(cls, deck: Multiset, card: str):
-        result = deck.copy()
-        result.remove(card, 1)
         return result
