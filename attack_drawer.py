@@ -1,54 +1,65 @@
-from typing import List
+from typing import Iterable
+
+from multiset import Multiset
 
 
-class Draws(List[str]):
-    def __init__(self, cards: List[str], partitions: int):
-        super().__init__(cards)
+class Draws:
+    def __init__(self, cards: Iterable[str], partitions: int):
+        self.cards = tuple(cards)
         self.partitions = partitions
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Draws):
             return super().__eq__(o) and self.partitions == o.partitions
 
+    def __hash__(self) -> int:
+        return hash((self.cards, self.partitions))
+
+    def __repr__(self) -> str:
+        return "Draws({!r}, {!r})".format(self.cards, self.partitions)
+
 
 class AttackDrawer:
     @staticmethod
-    def form_all_draws(deck: List[str]) -> List[Draws]:
+    def form_all_draws(deck: Multiset) -> Multiset:
         result = []
         for card in deck:
             if card.startswith('R'):
                 result.extend(AttackDrawer.rolling_modifier_draws(deck, card))
             else:
-                result.append(Draws([card], 1))
-        return result
+                result.append(Draws((card,), 1))
+        return Multiset(result)
 
     @staticmethod
-    def rolling_modifier_draws(deck: List[str], card: str) -> List[Draws]:
+    def rolling_modifier_draws(deck: Multiset, card: str) -> Multiset:
         result = []
-        remaining_deck = deck.copy()
-        remaining_deck.remove(card)
+        remaining_deck = AttackDrawer.subtract_from_deck(deck, card)
 
         nested_results = AttackDrawer.form_all_draws(remaining_deck)
         for nested_draws in nested_results:
-            result.append(Draws([card] + nested_draws, 1))
-        return result
+            result.append(Draws((card,) + nested_draws.cards, 1))
+        return Multiset(result)
 
     @staticmethod
-    def form_all_advantage_draws(deck: List[str]) -> List[Draws]:
+    def form_all_advantage_draws(deck: Multiset) -> Multiset:
         result = []
         for card in deck:
-            remaining_cards = deck.copy()
-            remaining_cards.remove(card)
+            remaining_cards = AttackDrawer.subtract_from_deck(deck, card)
             for next_card in remaining_cards:
                 first_rolling = card.startswith('R')
                 second_rolling = next_card.startswith('R')
                 partitions = 1 if first_rolling or second_rolling else 2
                 if first_rolling and second_rolling:
-                    rolling_deck = remaining_cards.copy()
-                    rolling_deck.remove(next_card)
+                    rolling_deck = AttackDrawer.subtract_from_deck(remaining_cards, next_card)
                     rolling_draws = AttackDrawer.form_all_draws(rolling_deck)
                     for rolling_draw in rolling_draws:
-                        result.append(Draws([card, next_card] + rolling_draw, 1))
+                        result.append(Draws((card, next_card) + rolling_draw.cards, 1))
                 else:
-                    result.append(Draws([card, next_card], partitions))
+                    result.append(Draws((card, next_card), partitions))
+        return Multiset(result)
+
+    @classmethod
+    def subtract_from_deck(cls, deck: Multiset, card: str):
+        result = deck.copy()
+        result.remove(card, 1)
         return result

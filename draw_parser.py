@@ -26,15 +26,15 @@ class DrawParser:
         else:
             real_draws = draws
 
-        for card in real_draws:
+        for card in real_draws.cards:
             if DrawParser.has_effect(card):
                 effects[card.split()[1]] += 1
         return Result(draws, effects)
 
     @classmethod
     def extract_better_advantaged_draw(cls, draws):
-        card_1 = draws[0]
-        card_2 = draws[1]
+        card_1 = draws.cards[0]
+        card_2 = draws.cards[1]
         card_1_has_effect = cls.has_effect(card_1)
         card_2_has_effect = cls.has_effect(card_2)
         card_1_number = cls.extract_number(card_1)
