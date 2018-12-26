@@ -1,21 +1,15 @@
-from multiset import FrozenMultiset
-
+import deck_generator
 from attack_drawer import AttackDrawer
 from draw_parser import DrawParser
 from simple_timer_context import SimpleTimerContext
 
 
 def main():
-    default_deck = ['+0', '+0', '+0', '+0', '+0', '+0',
-                    '+1', '+1', '+1', '+1', '+1',
-                    '-1', '-1', '-1', '-1', '-1',
-                    '-2', '+2', 'x0', 'x2']
-    deck = default_deck.copy()
+    deck = deck_generator.get_default_deck()
     print(deck)
 
-    input_deck = FrozenMultiset(deck)
     with SimpleTimerContext("Generating all possible draws for deck."):
-        all_possible_draws = AttackDrawer.form_all_advantage_draws(input_deck)
+        all_possible_draws = AttackDrawer.form_all_advantage_draws(deck)
     for draw in all_possible_draws:
         print(DrawParser.make_result(draw))
 
