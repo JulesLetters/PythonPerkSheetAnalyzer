@@ -4,17 +4,17 @@ from attack_drawer import Draw
 
 
 class Result:
-    def __init__(self, draws: Draw, effects):
-        self.draws = draws
+    def __init__(self, draw: Draw, effects: Counter):
+        self.draw = draw
         self.effects = effects
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Result):
-            return self.draws == o.draws and self.effects == o.effects
+            return self.draw == o.draw and self.effects == o.effects
         return False
 
     def __repr__(self) -> str:
-        return "Result({!r}, {!r})".format(self.draws, self.effects)
+        return "Result({!r}, {!r})".format(self.draw, self.effects)
 
 
 class DrawParser:
