@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from multiset import FrozenMultiset
 
-import rolling_card_statistics
+import rolling_draw_statistics
 
 
 class TestRollingCardStatistics(TestCase):
@@ -11,7 +11,7 @@ class TestRollingCardStatistics(TestCase):
         deck = FrozenMultiset(['+0', '+0', '+0'])
         expected = Counter({FrozenMultiset(): 1})
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_one_rolling_modifier(self):
@@ -19,7 +19,7 @@ class TestRollingCardStatistics(TestCase):
         expected = Counter({FrozenMultiset(): 1,
                             FrozenMultiset({'R+0'}): 1})
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_two_rolling_modifiers_get_combined(self):
@@ -29,7 +29,7 @@ class TestRollingCardStatistics(TestCase):
                             FrozenMultiset({'R+1'}): 1,
                             FrozenMultiset({'R+0', 'R+1'}): 2})
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_two_equal_name_rolling_modifiers_are_counted_in_same_bucket(self):
@@ -38,7 +38,7 @@ class TestRollingCardStatistics(TestCase):
                             FrozenMultiset({'R+0'}): 2,
                             FrozenMultiset({'R+0': 2}): 2})
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_two_equal_name_rolling_modifiers_and_one_different(self):
@@ -51,7 +51,7 @@ class TestRollingCardStatistics(TestCase):
                             FrozenMultiset({'R+0': 2, 'R+1': 1}): 6
                             })
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_three_card_types_with_two_duplicate_types(self):
@@ -81,7 +81,7 @@ class TestRollingCardStatistics(TestCase):
                             FrozenMultiset({'R+0': 2, 'R+1': 2, 'R+2': 1}): 120
                             })
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
 
     def test_three_duplicates_of_the_same_card_type(self):
@@ -100,5 +100,5 @@ class TestRollingCardStatistics(TestCase):
                             FrozenMultiset({'R+0': 1, 'R+1': 3}): 24,
                             })
 
-        actual = rolling_card_statistics.generate(deck)
+        actual = rolling_draw_statistics.generate(deck)
         self.assertEqual(expected, actual)
