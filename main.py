@@ -1,17 +1,31 @@
+import deck_analyzer
 import deck_generator
-from attack_drawer import AttackDrawer
-from draw_parser import DrawParser
-from simple_timer_context import SimpleTimerContext
+import perk_sheets
 
 
 def main():
-    deck = deck_generator.get_default_deck()
-    print(deck)
+    results = []
+    maximum = 0
 
-    with SimpleTimerContext("Generating all possible draws for deck."):
-        all_possible_draws = AttackDrawer.form_all_advantage_draws(deck)
-    for draw in all_possible_draws:
-        print(DrawParser.make_result(draw))
+    all_decks = deck_generator.generate_all_decks_for(perk_sheets.triforce)
+    deck_count = len(all_decks)
+    print("Decks to analyze: {}".format(deck_count))
+    for deck in all_decks:
+        deck_stats = deck_analyzer.calculate_statistics(deck)
+        rate = deck_stats.effect_rates['ICE']
+        if maximum < rate:
+            results = [(deck, deck_stats)]
+            maximum = rate
+        elif maximum == rate:
+            results += [(deck, deck_stats)]
+
+    print()
+    print("Attack Type: Normal")
+    print("  Maximal decks: {}".format(len(results)))
+    print("  Maximum value: {}".format(maximum))
+    print("   Decks:")
+    for (deck, deck_stats) in results:
+        print("   {}".format(deck))
 
 
 # Final output:
