@@ -23,10 +23,16 @@ class Card:
     def __str__(self) -> str:
         return self.text
 
+    def __lt__(self, other) -> bool:
+        return self.text < other.text
+
     def __eq__(self, o: object) -> bool:
         if isinstance(o, Card):
             return self.text == o.text
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.text)
 
     def __repr__(self) -> str:
         return "Card({!r}, {!r}, {!r}, {!r})".format(self.bonus, self.rolling,
@@ -48,3 +54,20 @@ negative_one = Card(_negative_one_atk, False)
 plus_zero = Card(_plus_zero_atk, False)
 plus_one = Card(_plus_one_atk, False)
 plus_two = Card(_plus_two_atk, False)
+
+rolling_plus_one = Card(_plus_one_atk, True)
+rolling_plus_zero_muddle = Card(_plus_zero_atk, True, singular_effect="Muddle")
+rolling_plus_zero_pierce_3 = Card(_plus_zero_atk, True, countable_effect="Pierce_3")
+rolling_plus_zero_stun = Card(_plus_zero_atk, True, singular_effect="Stun")
+rolling_plus_zero_add_target = Card(_plus_zero_atk, True, countable_effect="Add_Target")
+rolling_plus_one_refresh_item = Card(_plus_one_atk, True, countable_effect="Refresh_Item")
+
+plus_zero_fire = Card(_plus_zero_atk, False, singular_effect="Fire")
+plus_zero_ice = Card(_plus_zero_atk, False, singular_effect="Ice")
+plus_zero_air = Card(_plus_zero_atk, False, singular_effect="Air")
+plus_zero_earth = Card(_plus_zero_atk, False, singular_effect="Earth")
+
+plus_one_push_one = Card(_plus_one_atk, False, countable_effect="Push_1")
+plus_one_wound = Card(_plus_one_atk, False, singular_effect="Wound")
+plus_zero_stun = Card(_plus_zero_atk, False, singular_effect="Stun")
+plus_zero_add_target = Card(_plus_zero_atk, False, countable_effect="Add_Target")

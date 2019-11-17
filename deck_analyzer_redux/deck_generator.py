@@ -4,10 +4,10 @@ from typing import List, Callable, Dict, Iterable
 
 from multiset import FrozenMultiset
 
-_default_deck = ['+0', '+0', '+0', '+0', '+0', '+0',
-                 '+1', '+1', '+1', '+1', '+1',
-                 '-1', '-1', '-1', '-1', '-1',
-                 '-2', '+2', 'x0', 'x2']
+import deck_analyzer_redux.cards as cards
+
+_default_deck = [cards.plus_zero] * 6 + [cards.plus_one] * 5 + [cards.negative_one] * 5 + \
+                [cards.negative_two, cards.plus_two, cards.null_card, cards.times_two]
 
 
 def get_default_deck() -> FrozenMultiset:
