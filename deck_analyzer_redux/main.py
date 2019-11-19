@@ -72,7 +72,12 @@ def main():
     print("Decks to analyze: {}".format(deck_count))
 
     deck_statistics = {}
+    n = 0
     for deck, generation_methods in decks_and_generation_methods.items():
+        n += 1
+        if n % 100 == 0:
+            print(".", end="", flush=True)
+        normal_statistics = DeckStatistics(generation_methods)
 
         # Of all possible unique decks, there's still a lot of non-unique rolling and terminator collections.
         # That means an optimization is possible here, caching the result of this loop for given collections.
