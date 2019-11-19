@@ -60,7 +60,7 @@ rolling_plus_zero_muddle = Card(_plus_zero_atk, True, singular_effect="Muddle")
 rolling_plus_zero_pierce_3 = Card(_plus_zero_atk, True, countable_effect="Pierce_3")
 rolling_plus_zero_stun = Card(_plus_zero_atk, True, singular_effect="Stun")
 rolling_plus_zero_add_target = Card(_plus_zero_atk, True, countable_effect="Add_Target")
-rolling_plus_one_refresh_item = Card(_plus_one_atk, True, countable_effect="Refresh_Item")
+plus_one_refresh_item = Card(_plus_one_atk, False, countable_effect="Refresh_Item")
 
 plus_zero_fire = Card(_plus_zero_atk, False, singular_effect="Fire")
 plus_zero_ice = Card(_plus_zero_atk, False, singular_effect="Ice")

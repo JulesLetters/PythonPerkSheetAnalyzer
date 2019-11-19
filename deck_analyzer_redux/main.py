@@ -39,17 +39,31 @@ def add_card_to_aggregate_line_results(card: Card, aggregate: AggregateLine) -> 
 
     if card.countable_effect:
         countable_effects = aggregate.countable_effects.copy()
-        countable_effects.update(card.countable_effect)
+        countable_effects[card.countable_effect] += 1
     else:
         countable_effects = aggregate.countable_effects
 
     if card.singular_effect:
         singular_effects = aggregate.singular_effects.copy()
-        singular_effects.update(card.singular_effect)
+        singular_effects[card.singular_effect] = True
     else:
         singular_effects = aggregate.singular_effects
 
     return AggregateLine(atk_calculation, countable_effects, singular_effects)
+
+
+class DeckStatistics:
+    def __init__(self, generation_methods) -> None:
+        self.countable_effect_odds = defaultdict(Fraction)
+        self.singular_effect_odds = defaultdict(Fraction)
+        self.generation_methods = generation_methods
+
+    def add_aggregate(self, aggregate: AggregateLine, odds: Fraction):
+        for effect, count in aggregate.countable_effects.items():
+            self.countable_effect_odds[(effect, count)] += odds
+            self.singular_effect_odds[effect] += odds  # Chance a countable occurred.
+        for effect in aggregate.singular_effects:
+            self.singular_effect_odds[effect] += odds
 
 
 def main():
@@ -59,8 +73,6 @@ def main():
 
     deck_statistics = {}
     for deck, generation_methods in decks_and_generation_methods.items():
-        countable_effect_odds = defaultdict(Fraction)
-        singular_effect_odds = defaultdict(Fraction)
 
         # Of all possible unique decks, there's still a lot of non-unique rolling and terminator collections.
         # That means an optimization is possible here, caching the result of this loop for given collections.
@@ -76,8 +88,7 @@ def main():
         # validate_permutation_count(rolling_cards, unique_rolling_combinations)
 
         counted_terminator_cards = Counter(terminator_cards)
-        n = len(deck)
-
+        deck_length = len(deck)
         for line, line_occurrence_count in unique_rolling_combinations.items():
             # line_occurrence_count is the unordered probability numerator.
             # rolling_permutations, below, is the numerator for the probability where order matters.
@@ -85,27 +96,16 @@ def main():
             aggregate_line_results = make_aggregate_line_results(line)
 
             sequence_length = len(line) + 1
-            denominator = reduce(operator.mul, range(n, n - sequence_length, -1), 1)
+            denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
             for terminator_card, count in counted_terminator_cards.items():
                 # terminated_line = line.union([terminator_card])
                 odds = Fraction(rolling_permutations * count, denominator)  # non-advantage.
                 terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
 
-                for effect in terminated_aggregate.countable_effects:
-                    countable_effect_odds[effect] += odds
-                    singular_effect_odds[effect] += odds  # Chance a countable occurred.
-                for effect in terminated_aggregate.singular_effects:
-                    singular_effect_odds[effect] += odds
+                normal_statistics.add_aggregate(terminated_aggregate, odds)
 
                 # For advantage, we actually have to pick between two outcomes (terminals)
-        deck_statistics[deck] = (countable_effect_odds, singular_effect_odds, generation_methods)
-
-        # total_odds = Fraction()
-        # for d in draw_information:
-        #     total_odds += d[1]
-        #     print(d[1], d[0])
-        # print(total_odds)
-        # assert total_odds == Fraction(1, 1)
+        deck_statistics[deck] = normal_statistics
 
         # Then, depending on advantage:
         # 0 rolling: 2 terminators. Rolling isn't used. Analyze and pick better.
@@ -114,9 +114,8 @@ def main():
     print("")
     decks_by_odds = defaultdict(list)
     for deck, statistics in deck_statistics.items():
-        odds = statistics[0]["Refresh_Item"]
-        generation_methods = statistics[2]
-        decks_by_odds[odds].append(generation_methods)
+        odds = statistics.countable_effect_odds[("Refresh_Item", 1)]
+        decks_by_odds[odds].append(statistics.generation_methods)
     best_odds = max(decks_by_odds.keys())
     print(best_odds)
     for gen in decks_by_odds[best_odds]:

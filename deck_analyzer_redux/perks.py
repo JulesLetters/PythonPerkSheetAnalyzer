@@ -52,7 +52,7 @@ def add_one_rolling_add_target(deck: Deck) -> None:
 
 
 def add_one_plus_zero_refresh_item(deck: Deck) -> None:
-    deck.append(cards.rolling_plus_one_refresh_item)
+    deck.append(cards.plus_one_refresh_item)
 
 
 def add_two_plus_ones(deck: Deck) -> None:
