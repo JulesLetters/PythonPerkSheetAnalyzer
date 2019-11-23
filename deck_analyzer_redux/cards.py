@@ -20,6 +20,22 @@ class Card:
 
         self.text = text
 
+    def adv_compare(self, other, atk: int):
+        atk1 = self.bonus[1](atk)
+        atk2 = other.bonus[1](atk)
+        if not self.singular_effect and not other.singular_effect:
+            if atk1 > atk2:
+                return 1
+            elif atk1 < atk2:
+                return -1
+        elif self.singular_effect and not other.singular_effect:
+            if atk1 >= atk2:
+                return 1
+        elif not self.singular_effect and other.singular_effect:
+            if atk1 <= atk2:
+                return -1
+        return 0
+
     def __str__(self) -> str:
         return self.text
 

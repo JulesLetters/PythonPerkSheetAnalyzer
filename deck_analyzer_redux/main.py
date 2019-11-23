@@ -77,6 +77,7 @@ def main():
     deck_count = len(decks_and_generation_methods)
     print("Decks to analyze: {}".format(deck_count))
 
+    atk = 3
     all_deck_statistics = {}
     n = 0
     for deck, generation_methods in decks_and_generation_methods.items():
@@ -84,6 +85,7 @@ def main():
         if n % 100 == 0:
             print(".", end="", flush=True)
         normal_statistics = DeckStatistics(generation_methods)
+        advantage_statistics = DeckStatistics(generation_methods)
 
         # Of all possible unique decks, there's still a lot of non-unique rolling and terminator collections.
         # That means an optimization is possible here, caching the result of this loop for given collections.
@@ -93,11 +95,43 @@ def main():
         terminator_cards = [card for card in deck if not card.rolling]
 
         counted_terminator_cards = Counter(terminator_cards)
+
+        two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
+
+        advantage_terminators = itertools.combinations(terminator_cards, 2)
+        for terminator_pair in advantage_terminators:
+            cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
+            if cmp == -1:
+                al = card_to_aggregate_line(terminator_pair[1])
+                advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+            elif cmp == 1:
+                al = card_to_aggregate_line(terminator_pair[0])
+                advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+            else:
+                a = card_to_aggregate_line(terminator_pair[0])
+                advantage_statistics.add_aggregate(a, two_card_denominator)
+                b = card_to_aggregate_line(terminator_pair[1])
+                advantage_statistics.add_aggregate(b, two_card_denominator)
+
+        for card_pair in itertools.product(terminator_cards, rolling_cards):
+            advantage_statistics.add_aggregate(make_aggregate_line_results(card_pair), 2 * two_card_denominator)
+
         unique_rolling_combinations = Counter()
         for i in range(1, len(rolling_cards) + 1):
             unique_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, i)])
 
         # validate_permutation_count(rolling_cards, unique_rolling_combinations)  # Debug assertion
+
+        for line, line_occurrence_count in [(x, y) for (x, y) in unique_rolling_combinations.items() if len(x) > 1]:
+            rolling_permutations = line_occurrence_count * math.factorial(len(line))
+            aggregate_line_results = make_aggregate_line_results(line)
+            sequence_length = len(line) + 1
+            denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
+            for terminator_card, count in counted_terminator_cards.items():
+                odds = Fraction(rolling_permutations * count, denominator)
+                terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
+
+                advantage_statistics.add_aggregate(terminated_aggregate, odds)
 
         for line, line_occurrence_count in unique_rolling_combinations.items():
             # line_occurrence_count is the unordered probability numerator.
@@ -109,7 +143,7 @@ def main():
             denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
             for terminator_card, count in counted_terminator_cards.items():
                 # terminated_line = line.union([terminator_card])
-                odds = Fraction(rolling_permutations * count, denominator)  # non-advantage.
+                odds = Fraction(rolling_permutations * count, denominator)
                 terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
 
                 normal_statistics.add_aggregate(terminated_aggregate, odds)
@@ -121,18 +155,29 @@ def main():
 
             normal_statistics.add_aggregate(terminated_aggregate, odds)
 
-        all_deck_statistics[deck] = normal_statistics
+        all_deck_statistics[deck] = (normal_statistics, advantage_statistics)
         # assert normal_statistics.total_odds == 1  # Debug assertion
+        # assert advantage_statistics.total_odds == 1  # Debug assertion
     print("")
 
     decks_by_odds = defaultdict(list)
     for deck, statistics in all_deck_statistics.items():
-        odds = statistics.countable_effect_odds[("Refresh_Item", 1)]
-        decks_by_odds[odds].append(statistics.generation_methods)
-    best_odds = max(decks_by_odds.keys())
-    print(best_odds)
-    for gen in decks_by_odds[best_odds]:
-        print(gen)
+        advantage_statistics = statistics[1]
+        odds = advantage_statistics.countable_effect_odds[("Refresh_Item", 1)]
+        decks_by_odds[odds].append(advantage_statistics.generation_methods)
+
+    level_9_decks = defaultdict(list)
+    for odds, generation_methods in decks_by_odds.items():
+        for method in generation_methods:
+            if len(method[0]) >= 8:
+                level_9_decks[odds].append(method)
+
+    top_four_odds = sorted(level_9_decks.keys())[-4:]
+    print(top_four_odds)
+    for odds in top_four_odds:
+        print(odds)
+        for gen in level_9_decks[odds]:
+            print(gen)
 
     print('Done!')
 
