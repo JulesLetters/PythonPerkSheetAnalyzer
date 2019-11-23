@@ -10,6 +10,7 @@ from multiset import FrozenMultiset
 
 from deck_analyzer_redux import perk_sheets, deck_generator
 from deck_analyzer_redux.cards import Card
+from deck_analyzer_redux.simple_timer_context import SimpleTimerContext
 
 
 def unique_ordered_combinations(string_counts, length):
@@ -199,4 +200,5 @@ def validate_permutation_count(rolling_cards, rolling_combination_counts):
 
 
 if __name__ == '__main__':
-    main()
+    with SimpleTimerContext("Calculating all character decks."):
+        main()
