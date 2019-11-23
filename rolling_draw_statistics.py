@@ -14,6 +14,17 @@ def generate(deck: FrozenMultiset) -> Counter:
         if card.startswith("R"):
             rolling_cards.append(card)
 
+    # Ideally, something like this would actually return
+    # the relative probabilities.
+    # That is, the sum of all outputs from this function would be 1.
+    # This would allow much easier multiplication.
+    # Right now, the problem exists where {+0 ICE} actually is a subset of {+0 ICE, +0 ICE}.
+    # ...
+    # Though actually, the odds are fairly easy to calculate.
+    # Assuming all Draws are starting from the first-drawn card,
+    # the only thing necessary to do is multiply every draw by
+    # the chance of NOT drawing another rolling modifier.
+
     with SimpleTimerContext("Generating all rolling card arrangements."):
         result = Counter()
         rolling_cards_multiset = FrozenMultiset(rolling_cards)

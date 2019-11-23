@@ -67,3 +67,57 @@ class TestDeckAnalyzer(TestCase):
 
         self.assertEqual(Fraction(2, 5), actual.effect_rates['ICE'])
         self.assertEqual(Fraction(3, 5), actual.effect_rates['FIRE'])
+
+    def test_deck_with_ice_on_rolling_modifier(self):
+        deck = FrozenMultiset(['R+0 ICE', '+0', '+0'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(1, 3), actual.effect_rates['ICE'])
+
+    def test_deck_with_two_ice_on_rolling_modifiers(self):
+        deck = FrozenMultiset(['R+0 ICE', 'R+0 ICE', '+0'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(2, 3), actual.effect_rates['ICE'])
+
+    def test_deck_with_three_ice_on_rolling_modifiers(self):
+        deck = FrozenMultiset(['R+0 ICE', 'R+0 ICE', 'R+0 ICE',
+                               '+0', '+0', '+0'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(1, 2), actual.effect_rates['ICE'])
+
+    def test_deck_with_ice_on_rolling_modifier_and_ice_on_terminator(self):
+        deck = FrozenMultiset(['R+0 ICE', '+0', '+0 ICE'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(2, 3), actual.effect_rates['ICE'])
+
+    def test_deck_with_ice_on_rolling_modifier_and_two_ice_on_terminator(self):
+        deck = FrozenMultiset(['R+0 ICE', '+0', '+0 ICE', '+0 ICE'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(3, 4), actual.effect_rates['ICE'])
+
+    def test_deck_with_three_rolling_ice_and_two_terminating_ice_and_one_zero(self):
+        deck = FrozenMultiset(['R+0 ICE', 'R+0 ICE', 'R+0 ICE',
+                               '+0',
+                               '+0 ICE', '+0 ICE'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(2, 3), actual.effect_rates['ICE'])
+
+    def test_deck_with_three_rolling_ice_and_two_terminating_ice_and_two_zeroes(self):
+        deck = FrozenMultiset(['R+0 ICE', 'R+0 ICE', 'R+0 ICE',
+                               '+0', '+0'
+                               '+0 ICE', '+0 ICE'])
+
+        actual = deck_analyzer.calculate_statistics(deck)
+
+        self.assertEqual(Fraction(1, 2), actual.effect_rates['ICE'])
