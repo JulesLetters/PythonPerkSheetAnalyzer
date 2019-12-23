@@ -8,9 +8,9 @@ from typing import Iterable
 
 from multiset import FrozenMultiset
 
-from deck_analyzer_redux import perk_sheets, deck_generator
-from deck_analyzer_redux.cards import Card
-from deck_analyzer_redux.simple_timer_context import SimpleTimerContext
+from deck_analyzer import perk_sheets, deck_generator
+from deck_analyzer.cards import Card
+from deck_analyzer.simple_timer_context import SimpleTimerContext
 
 
 def unique_ordered_combinations(string_counts, length):

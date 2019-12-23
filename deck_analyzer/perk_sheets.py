@@ -1,4 +1,4 @@
-import perks
+import deck_analyzer.perks as perks
 
 three_spears = [
     perks.remove_two_negative_ones,

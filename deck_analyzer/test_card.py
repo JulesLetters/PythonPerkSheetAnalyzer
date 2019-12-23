@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from deck_analyzer_redux.cards import negative_two, negative_one, plus_zero, plus_one, plus_two, _negative_two_atk, \
+from deck_analyzer.cards import negative_two, negative_one, plus_zero, plus_one, plus_two, _negative_two_atk, \
     Card, _plus_two_atk, _negative_one_atk, _plus_zero_atk, _plus_one_atk
 
 negative_two_x = Card(_negative_two_atk, False, singular_effect="X")

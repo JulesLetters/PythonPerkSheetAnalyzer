@@ -3,7 +3,7 @@ import timeit
 from collections import OrderedDict
 from typing import List, Dict
 
-from deck_analyzer_redux.combo_roller import collect_decks
+from deck_analyzer.combo_roller import collect_decks
 
 
 def generate_string(counts: Dict) -> str:

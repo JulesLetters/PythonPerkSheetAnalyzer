@@ -4,7 +4,7 @@ from typing import List, Callable, Dict, Iterable
 
 from multiset import FrozenMultiset
 
-import deck_analyzer_redux.cards as cards
+import deck_analyzer.cards as cards
 
 _default_deck = [cards.plus_zero] * 6 + [cards.plus_one] * 5 + [cards.negative_one] * 5 + \
                 [cards.negative_two, cards.plus_two, cards.null_card, cards.times_two]

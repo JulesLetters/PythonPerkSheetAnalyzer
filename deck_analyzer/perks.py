@@ -1,6 +1,6 @@
 from typing import List
 
-import deck_analyzer_redux.cards as cards
+import deck_analyzer.cards as cards
 
 
 Deck = List[cards.Card]
