@@ -17,6 +17,7 @@ def unique_ordered_combinations(string_counts, length):
     return set(["".join(sorted(c)) for c in itertools.combinations(string_counts, length)])
 
 
+EITHER_ORDER = 2
 AggregateLine = namedtuple("AggregateLine", "atk_calculation countable_effects singular_effects")
 AggregateLineWithOdds = namedtuple("AggregateLineWithOdds", "aggregate_line odds")
 
@@ -101,10 +102,10 @@ def analyze_deck(atk, deck, generation_methods):
         cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
         if cmp == -1:
             al = card_to_aggregate_line(terminator_pair[1])
-            advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+            advantage_statistics.add_aggregate(al, two_card_denominator * EITHER_ORDER)
         elif cmp == 1:
             al = card_to_aggregate_line(terminator_pair[0])
-            advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+            advantage_statistics.add_aggregate(al, two_card_denominator * EITHER_ORDER)
         else:
             a = card_to_aggregate_line(terminator_pair[0])
             advantage_statistics.add_aggregate(a, two_card_denominator)
@@ -123,7 +124,7 @@ def analyze_deck(atk, deck, generation_methods):
     short_rolling = analyze_rolling_combos(counted_terminator_cards, deck_length, short_rolling_combinations)
     for terminated_line in short_rolling:
         # Advantage gets odds times two because either order can happen and count when advantaged.
-        advantage_statistics.add_aggregate(terminated_line.aggregate_line, terminated_line.odds * 2)
+        advantage_statistics.add_aggregate(terminated_line.aggregate_line, terminated_line.odds * EITHER_ORDER)
         normal_statistics.add_aggregate(terminated_line.aggregate_line, terminated_line.odds)
 
     lengthy_rolling = analyze_rolling_combos(counted_terminator_cards, deck_length, lengthy_rolling_combinations)
