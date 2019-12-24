@@ -73,6 +73,84 @@ class DeckStatistics:
         self.total_odds += odds
 
 
+def analyze_deck(atk, deck, generation_methods):
+    normal_statistics = DeckStatistics(generation_methods)
+    advantage_statistics = DeckStatistics(generation_methods)
+
+    # Of all possible unique decks, there's still a lot of non-unique rolling and terminator collections.
+    # That means an optimization is possible here, caching the result of this loop for given collections.
+    # (This isn't done, but should be done at some point)
+    deck_length = len(deck)
+    rolling_cards = [card for card in deck if card.rolling]
+    terminator_cards = [card for card in deck if not card.rolling]
+
+    counted_terminator_cards = Counter(terminator_cards)
+
+    two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
+
+    for terminator_card, count in counted_terminator_cards.items():
+        # terminated_line = line.union([terminator_card])
+        odds = Fraction(count, deck_length)
+        terminated_aggregate = card_to_aggregate_line(terminator_card)
+
+        normal_statistics.add_aggregate(terminated_aggregate, odds)
+
+    advantage_terminators = itertools.combinations(terminator_cards, 2)
+    for terminator_pair in advantage_terminators:
+        cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
+        if cmp == -1:
+            al = card_to_aggregate_line(terminator_pair[1])
+            advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+        elif cmp == 1:
+            al = card_to_aggregate_line(terminator_pair[0])
+            advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
+        else:
+            a = card_to_aggregate_line(terminator_pair[0])
+            advantage_statistics.add_aggregate(a, two_card_denominator)
+            b = card_to_aggregate_line(terminator_pair[1])
+            advantage_statistics.add_aggregate(b, two_card_denominator)
+
+    short_rolling_combinations = Counter()
+    short_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, 1)])
+
+    lengthy_rolling_combinations = Counter()
+    for i in range(2, len(rolling_cards) + 1):
+        lengthy_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, i)])
+
+    # validate_permutation_count(rolling_cards, unique_rolling_combinations)  # Debug assertion
+
+    for line, line_occurrence_count in short_rolling_combinations.items():
+        # line_occurrence_count is the unordered probability numerator.
+        # rolling_permutations, below, is the numerator for the probability where order matters.
+        rolling_permutations = line_occurrence_count * math.factorial(len(line))
+        aggregate_line_results = make_aggregate_line_results(line)
+
+        sequence_length = len(line) + 1
+        denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
+        for terminator_card, count in counted_terminator_cards.items():
+            # terminated_line = line.union([terminator_card])
+            odds = Fraction(rolling_permutations * count, denominator)
+            terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
+
+            advantage_statistics.add_aggregate(terminated_aggregate, odds * 2)  # * 2 because either order counts.
+            normal_statistics.add_aggregate(terminated_aggregate, odds)
+
+    for line, line_occurrence_count in lengthy_rolling_combinations.items():
+        rolling_permutations = line_occurrence_count * math.factorial(len(line))
+        aggregate_line_results = make_aggregate_line_results(line)
+        sequence_length = len(line) + 1
+        denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
+        for terminator_card, count in counted_terminator_cards.items():
+            # terminated_line = line.union([terminator_card])
+            odds = Fraction(rolling_permutations * count, denominator)
+            terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
+
+            normal_statistics.add_aggregate(terminated_aggregate, odds)
+            advantage_statistics.add_aggregate(terminated_aggregate, odds)
+
+    return advantage_statistics, normal_statistics
+
+
 def main():
     decks_and_generation_methods = deck_generator.all_decks_and_generations_for(perk_sheets.three_spears)
     deck_count = len(decks_and_generation_methods)
@@ -85,79 +163,7 @@ def main():
         n += 1
         if n % 100 == 0:
             print(".", end="", flush=True)
-        normal_statistics = DeckStatistics(generation_methods)
-        advantage_statistics = DeckStatistics(generation_methods)
-
-        # Of all possible unique decks, there's still a lot of non-unique rolling and terminator collections.
-        # That means an optimization is possible here, caching the result of this loop for given collections.
-        # (This isn't done, but should be done at some point)
-        deck_length = len(deck)
-        rolling_cards = [card for card in deck if card.rolling]
-        terminator_cards = [card for card in deck if not card.rolling]
-
-        counted_terminator_cards = Counter(terminator_cards)
-
-        two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
-
-        for terminator_card, count in counted_terminator_cards.items():
-            # terminated_line = line.union([terminator_card])
-            odds = Fraction(count, deck_length)
-            terminated_aggregate = card_to_aggregate_line(terminator_card)
-
-            normal_statistics.add_aggregate(terminated_aggregate, odds)
-
-        advantage_terminators = itertools.combinations(terminator_cards, 2)
-        for terminator_pair in advantage_terminators:
-            cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
-            if cmp == -1:
-                al = card_to_aggregate_line(terminator_pair[1])
-                advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
-            elif cmp == 1:
-                al = card_to_aggregate_line(terminator_pair[0])
-                advantage_statistics.add_aggregate(al, 2 * two_card_denominator)
-            else:
-                a = card_to_aggregate_line(terminator_pair[0])
-                advantage_statistics.add_aggregate(a, two_card_denominator)
-                b = card_to_aggregate_line(terminator_pair[1])
-                advantage_statistics.add_aggregate(b, two_card_denominator)
-
-        short_rolling_combinations = Counter()
-        short_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, 1)])
-
-        lengthy_rolling_combinations = Counter()
-        for i in range(2, len(rolling_cards) + 1):
-            lengthy_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, i)])
-
-        # validate_permutation_count(rolling_cards, unique_rolling_combinations)  # Debug assertion
-
-        for line, line_occurrence_count in short_rolling_combinations.items():
-            # line_occurrence_count is the unordered probability numerator.
-            # rolling_permutations, below, is the numerator for the probability where order matters.
-            rolling_permutations = line_occurrence_count * math.factorial(len(line))
-            aggregate_line_results = make_aggregate_line_results(line)
-
-            sequence_length = len(line) + 1
-            denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
-            for terminator_card, count in counted_terminator_cards.items():
-                # terminated_line = line.union([terminator_card])
-                odds = Fraction(rolling_permutations * count, denominator)
-                terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
-
-                advantage_statistics.add_aggregate(terminated_aggregate, odds * 2)  # * 2 because either order counts.
-                normal_statistics.add_aggregate(terminated_aggregate, odds)
-
-        for line, line_occurrence_count in lengthy_rolling_combinations.items():
-            rolling_permutations = line_occurrence_count * math.factorial(len(line))
-            aggregate_line_results = make_aggregate_line_results(line)
-            sequence_length = len(line) + 1
-            denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
-            for terminator_card, count in counted_terminator_cards.items():
-                # terminated_line = line.union([terminator_card])
-                odds = Fraction(rolling_permutations * count, denominator)
-                terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
-
-                normal_statistics.add_aggregate(terminated_aggregate, odds)
-                advantage_statistics.add_aggregate(terminated_aggregate, odds)
+        advantage_statistics, normal_statistics = analyze_deck(atk, deck, generation_methods)
 
         all_deck_statistics[deck] = (normal_statistics, advantage_statistics)
         # assert normal_statistics.total_odds == 1  # Debug assertion
