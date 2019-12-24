@@ -86,15 +86,13 @@ def analyze_deck(atk, deck, generation_methods):
 
     counted_terminator_cards = Counter(terminator_cards)
 
-    two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
-
     for terminator_card, count in counted_terminator_cards.items():
-        # terminated_line = line.union([terminator_card])
         odds = Fraction(count, deck_length)
         terminated_aggregate = card_to_aggregate_line(terminator_card)
 
         normal_statistics.add_aggregate(terminated_aggregate, odds)
 
+    two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
     advantage_terminators = itertools.combinations(terminator_cards, 2)
     for terminator_pair in advantage_terminators:
         cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
@@ -120,15 +118,12 @@ def analyze_deck(atk, deck, generation_methods):
     # validate_permutation_count(rolling_cards, unique_rolling_combinations)  # Debug assertion
 
     for line, line_occurrence_count in short_rolling_combinations.items():
-        # line_occurrence_count is the unordered probability numerator.
-        # rolling_permutations, below, is the numerator for the probability where order matters.
         rolling_permutations = line_occurrence_count * math.factorial(len(line))
         aggregate_line_results = make_aggregate_line_results(line)
 
         sequence_length = len(line) + 1
         denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
         for terminator_card, count in counted_terminator_cards.items():
-            # terminated_line = line.union([terminator_card])
             odds = Fraction(rolling_permutations * count, denominator)
             terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
 
@@ -141,7 +136,6 @@ def analyze_deck(atk, deck, generation_methods):
         sequence_length = len(line) + 1
         denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
         for terminator_card, count in counted_terminator_cards.items():
-            # terminated_line = line.union([terminator_card])
             odds = Fraction(rolling_permutations * count, denominator)
             terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
 
