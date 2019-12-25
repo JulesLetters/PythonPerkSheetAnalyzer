@@ -1,6 +1,7 @@
 import itertools
 import timeit
 from collections import OrderedDict
+from fractions import Fraction
 from typing import List, Dict
 
 from deck_analyzer.combo_roller import collect_decks
@@ -35,6 +36,26 @@ def ordered_combinations(counts: Dict, max_combo_len: int) -> List:
 
 
 def main():
+    dict_tester = {'a': Fraction(2, 3)}
+
+    new_dict = dict_tester.copy()
+    new_dict['a'] += Fraction(3, 3)
+
+    assert new_dict['a'] == Fraction(5, 3)
+    assert dict_tester['a'] == Fraction(2, 3)
+    print(new_dict['a'])
+    print(dict_tester['a'])
+
+    frac_a = Fraction(2, 3)
+    frac_b = Fraction(5, 7)
+
+    frac_c = frac_b
+    frac_x = Fraction(frac_b)
+
+    frac_b += frac_a
+    print(frac_b)
+    print(frac_c)
+
     # counts = {"A": 1, "B": 2, "C": 3, "D": 1}
     counts = OrderedDict([("A", 1), ("B", 2), ("C", 3), ("D", 1)])
     string_counts = generate_string(counts)
