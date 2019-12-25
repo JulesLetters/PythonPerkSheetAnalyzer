@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from deck_analyzer.cards import negative_two, negative_one, plus_zero, plus_one, plus_two, _negative_two_atk, \
-    Card, _plus_two_atk, _negative_one_atk, _plus_zero_atk, _plus_one_atk
+    Card, _plus_two_atk, _negative_one_atk, _plus_zero_atk, _plus_one_atk, times_two, null_card
 
 negative_two_s_x = Card(_negative_two_atk, False, singular_effect="X")
 negative_one_s_x = Card(_negative_one_atk, False, singular_effect="X")
@@ -114,3 +114,14 @@ class TestCard(TestCase):
         self.assertEqual(0, plus_zero_c_x.adv_compare(plus_one_c_x, atk))
         self.assertEqual(0, plus_one_s_x.adv_compare(plus_two_s_x, atk))
         self.assertEqual(0, plus_one_c_x.adv_compare(plus_two_c_x, atk))
+
+    def test_adv_compare_returns_zero_for_times_two_when_both_results_are_the_same(self):
+        self.assertEqual(0, plus_two.adv_compare(times_two, 2))
+        self.assertEqual(0, plus_one.adv_compare(times_two, 1))
+        self.assertEqual(0, plus_zero.adv_compare(times_two, 0))
+
+    def test_is_critical(self):
+        self.assertEqual(True, times_two.is_critical)
+        self.assertEqual(False, plus_one.is_critical)
+        self.assertEqual(False, plus_zero.is_critical)
+        self.assertEqual(False, null_card.is_critical)

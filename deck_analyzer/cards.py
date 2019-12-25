@@ -11,6 +11,7 @@ class Card:
         self.singular_effect = singular_effect
         self.countable_effect = countable_effect
 
+        self.is_critical = bonus is _times_two_atk
         self.has_effect = singular_effect or countable_effect
 
         text = "R" if rolling else ""
