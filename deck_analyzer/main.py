@@ -128,21 +128,10 @@ def analyze_deck(deck, generation_methods) -> List[Statistics]:
     critical_terminators = [c for c in terminator_cards if c.is_critical]
     non_critical_terminators = [c for c in terminator_cards if not c.is_critical]
 
-    two_card_denominator = Fraction(1, deck_length * (deck_length - 1))
+    two_card_odds_denominator = Fraction(1, deck_length * (deck_length - 1))
     advantage_terminators = itertools.combinations(non_critical_terminators, 2)
     for terminator_pair in advantage_terminators:
-        cmp = terminator_pair[0].adv_compare(terminator_pair[1], IRRELEVANT_ATTACK)
-        if cmp == -1:
-            al = card_to_aggregate_line(terminator_pair[1])
-            statistics.advantage.add_aggregate(al, two_card_denominator * EITHER_ORDER)
-        elif cmp == 1:
-            al = card_to_aggregate_line(terminator_pair[0])
-            statistics.advantage.add_aggregate(al, two_card_denominator * EITHER_ORDER)
-        else:
-            a = card_to_aggregate_line(terminator_pair[0])
-            statistics.advantage.add_aggregate(a, two_card_denominator)
-            b = card_to_aggregate_line(terminator_pair[1])
-            statistics.advantage.add_aggregate(b, two_card_denominator)
+        add_terminal_adv_to_stats(statistics.advantage, terminator_pair, IRRELEVANT_ATTACK, two_card_odds_denominator)
 
     critical_terminator_count = len(critical_terminators)
 
@@ -156,22 +145,26 @@ def analyze_deck(deck, generation_methods) -> List[Statistics]:
     for atk in ATK_RANGE:
         new_statistics = Statistics(statistics.normal, statistics.advantage.make_copy())
         for terminator in non_critical_terminators:
-            cmp = any_critical_card.adv_compare(terminator, atk)
             terminator_pair = (any_critical_card, terminator)
-            if cmp == -1:
-                al = card_to_aggregate_line(terminator_pair[1])
-                new_statistics.advantage.add_aggregate(al, two_card_denominator * EITHER_ORDER)
-            elif cmp == 1:
-                al = card_to_aggregate_line(terminator_pair[0])
-                new_statistics.advantage.add_aggregate(al, two_card_denominator * EITHER_ORDER)
-            else:
-                a = card_to_aggregate_line(terminator_pair[0])
-                new_statistics.advantage.add_aggregate(a, two_card_denominator)
-                b = card_to_aggregate_line(terminator_pair[1])
-                new_statistics.advantage.add_aggregate(b, two_card_denominator)
+            add_terminal_adv_to_stats(new_statistics.advantage, terminator_pair, atk, two_card_odds_denominator)
         result.append(new_statistics)
 
     return result
+
+
+def add_terminal_adv_to_stats(advantage_stats, terminator_pair, atk, two_card_odds_denominator):
+    cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
+    if cmp == -1:
+        al = card_to_aggregate_line(terminator_pair[1])
+        advantage_stats.add_aggregate(al, two_card_odds_denominator * EITHER_ORDER)
+    elif cmp == 1:
+        al = card_to_aggregate_line(terminator_pair[0])
+        advantage_stats.add_aggregate(al, two_card_odds_denominator * EITHER_ORDER)
+    else:
+        a = card_to_aggregate_line(terminator_pair[0])
+        advantage_stats.add_aggregate(a, two_card_odds_denominator)
+        b = card_to_aggregate_line(terminator_pair[1])
+        advantage_stats.add_aggregate(b, two_card_odds_denominator)
 
 
 def analyze_rolling_combos(counted_terminator_cards, deck_length, rolling_combinations) -> List[AggregateLineWithOdds]:
