@@ -12,11 +12,6 @@ from deck_analyzer import perk_sheets, deck_generator
 from deck_analyzer.cards import Card
 from deck_analyzer.simple_timer_context import SimpleTimerContext
 
-
-def unique_ordered_combinations(string_counts, length):
-    return set(["".join(sorted(c)) for c in itertools.combinations(string_counts, length)])
-
-
 ATK_RANGE = range(0, 26)
 EITHER_ORDER = 2
 IRRELEVANT_ATTACK = 3
@@ -112,6 +107,7 @@ def analyze_deck(deck, generation_methods) -> List[Statistics]:
     for atk in range(2, len(rolling_cards) + 1):
         lengthy_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, atk)])
 
+    # unique_rolling_combinations = short_rolling_combinations + lengthy_rolling_combinations
     # validate_permutation_count(rolling_cards, unique_rolling_combinations)  # Debug assertion
 
     short_rolling = analyze_rolling_combos(counted_terminator_cards, deck_length, short_rolling_combinations)
