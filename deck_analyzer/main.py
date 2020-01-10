@@ -58,10 +58,9 @@ def card_to_aggregate_line(card: Card) -> AggregateLine:
 
 
 class DeckStatistics:
-    def __init__(self, generation_methods) -> None:
+    def __init__(self) -> None:
         self.countable_effect_odds = defaultdict(Fraction)
         self.singular_effect_odds = defaultdict(Fraction)
-        self.generation_methods = generation_methods
         self.total_odds = Fraction()
 
     def add_aggregate(self, aggregate: AggregateLine, odds: Fraction) -> None:
@@ -73,15 +72,15 @@ class DeckStatistics:
         self.total_odds += odds
 
     def make_copy(self):
-        copy = DeckStatistics(self.generation_methods)
+        copy = DeckStatistics()
         copy.countable_effect_odds = self.countable_effect_odds.copy()
         copy.singular_effect_odds = self.singular_effect_odds.copy()
         copy.total_odds = self.total_odds
         return copy
 
 
-def analyze_deck(deck, generation_methods) -> List[Statistics]:
-    statistics = Statistics(DeckStatistics(generation_methods), DeckStatistics(generation_methods))
+def analyze_deck(deck) -> List[Statistics]:
+    statistics = Statistics(DeckStatistics(), DeckStatistics())
 
     # Possible optimization: Pre-calculate denominators involving deck_length and sequence_length.
 
@@ -191,18 +190,18 @@ def main():
         if n % 100 == 0:
             print(".", end="", flush=True)
 
-        all_atk_statistics = analyze_deck(deck, generation_methods)
+        all_atk_statistics = analyze_deck(deck)
         statistics = all_atk_statistics[3]
-        all_deck_statistics[deck] = statistics
+        all_deck_statistics[deck] = {'statistics': statistics, 'generation_methods': generation_methods}
         # for i in ATK_RANGE:
         #     assert all_atk_statistics[i].normal.total_odds == 1  # Debug assertion
         #     assert all_atk_statistics[i].advantage.total_odds == 1  # Debug assertion
     print("")
 
     decks_by_odds = defaultdict(list)
-    for deck, statistics in all_deck_statistics.items():
-        odds = statistics.advantage.countable_effect_odds[("Refresh_Item", 1)]
-        decks_by_odds[odds].append(statistics.advantage.generation_methods)
+    for deck, information in all_deck_statistics.items():
+        odds = information['statistics'].advantage.countable_effect_odds[("Refresh_Item", 1)]
+        decks_by_odds[odds].append(information['generation_methods'])
 
     level_9_decks = defaultdict(list)
     for odds, generation_methods in decks_by_odds.items():
