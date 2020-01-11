@@ -1,6 +1,6 @@
 import itertools
 from collections import defaultdict
-from typing import List, Callable, Dict, Iterable
+from typing import List, Callable, Dict, Iterable, NamedTuple
 
 from multiset import FrozenMultiset
 
@@ -17,11 +17,18 @@ def get_default_deck() -> FrozenMultiset:
 Perk = Callable[[List[str]], None]
 
 
-def all_decks_and_generations_for(perks: List[Perk]) -> Dict[FrozenMultiset, List[List[Perk]]]:
+class NamedPerk(NamedTuple):
+    name: str
+    deck_modification: Perk
+
+
+def all_decks_and_generations_for(perk_functions: List[Perk]) -> Dict[FrozenMultiset, List[List[NamedPerk]]]:
+    named_perks = [NamedPerk(p.__name__, p) for p in perk_functions]
+
     # Get all unique combinations of perks.
     perk_combinations = []
-    for i in range(0, len(perks) + 1):
-        perk_combinations.extend(itertools.combinations(perks, i))
+    for i in range(0, len(named_perks) + 1):
+        perk_combinations.extend(itertools.combinations(named_perks, i))
     unique_perk_combinations = frozenset(perk_combinations)
 
     # Generate all decks, and group the ways to make them.
@@ -32,8 +39,8 @@ def all_decks_and_generations_for(perks: List[Perk]) -> Dict[FrozenMultiset, Lis
     return decks_and_generation_methods
 
 
-def generate_deck(perks: Iterable[Perk]) -> FrozenMultiset:
+def generate_deck(perks: Iterable[NamedPerk]) -> FrozenMultiset:
     deck = _default_deck.copy()
-    for func in perks:
-        func(deck)
+    for perk in perks:
+        perk.deck_modification(deck)
     return FrozenMultiset(deck)

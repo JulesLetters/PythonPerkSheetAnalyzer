@@ -213,8 +213,10 @@ def main():
     print(top_four_odds)
     for odds in top_four_odds:
         print(odds)
-        for gen in level_9_decks[odds]:
-            print(gen)
+        for generation_methods in level_9_decks[odds]:
+            for generation_method in generation_methods:
+                perk_names = [perk.name for perk in generation_method]
+                print(perk_names)
 
     print('Done!')
 
