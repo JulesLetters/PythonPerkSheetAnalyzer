@@ -185,18 +185,19 @@ def main():
 
     all_deck_statistics = {}
     n = 0
-    for deck, generation_methods in decks_and_generation_methods.items():
-        n += 1
-        if n % 100 == 0:
-            print(".", end="", flush=True)
+    with SimpleTimerContext("Calculating all character decks."):
+        for deck, generation_methods in decks_and_generation_methods.items():
+            n += 1
+            if n % 100 == 0:
+                print(".", end="", flush=True)
 
-        all_atk_statistics = analyze_deck(deck)
-        statistics = all_atk_statistics[3]
-        all_deck_statistics[deck] = {'statistics': statistics, 'generation_methods': generation_methods}
-        # for i in ATK_RANGE:
-        #     assert all_atk_statistics[i].normal.total_odds == 1  # Debug assertion
-        #     assert all_atk_statistics[i].advantage.total_odds == 1  # Debug assertion
-    print("")
+            all_atk_statistics = analyze_deck(deck)
+            statistics = all_atk_statistics[3]
+            all_deck_statistics[deck] = {'statistics': statistics, 'generation_methods': generation_methods}
+            # for i in ATK_RANGE:
+            #     assert all_atk_statistics[i].normal.total_odds == 1  # Debug assertion
+            #     assert all_atk_statistics[i].advantage.total_odds == 1  # Debug assertion
+        print("")
 
     decks_by_odds = defaultdict(list)
     for deck, information in all_deck_statistics.items():
@@ -235,5 +236,4 @@ def validate_permutation_count(rolling_cards, rolling_combination_counts):
 
 
 if __name__ == '__main__':
-    with SimpleTimerContext("Calculating all character decks."):
-        main()
+    main()
