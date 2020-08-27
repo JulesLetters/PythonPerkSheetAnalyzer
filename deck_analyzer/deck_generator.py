@@ -6,8 +6,8 @@ from multiset import FrozenMultiset
 
 import deck_analyzer.cards as cards
 
-_default_deck = [cards.plus_zero] * 6 + [cards.plus_one] * 5 + [cards.negative_one] * 5 + \
-                [cards.negative_two, cards.plus_two, cards.null_card, cards.times_two]
+_default_deck = [cards.plus_0] * 6 + [cards.plus_1] * 5 + [cards.minus_1] * 5 + \
+                [cards.minus_2, cards.plus_2, cards.times_0, cards.times_2]
 
 
 def get_default_deck() -> FrozenMultiset:

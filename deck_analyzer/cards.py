@@ -11,7 +11,7 @@ class Card:
         self.singular_effect = singular_effect
         self.countable_effect = countable_effect
 
-        self.is_critical = bonus is _times_two_atk
+        self.is_critical = bonus is _times_2_atk
         self.has_effect = singular_effect or countable_effect
 
         text = "R" if rolling else ""
@@ -58,35 +58,42 @@ class Card:
                                                      self.countable_effect, self.singular_effect)
 
 
-_times_two_atk = ("2x", lambda x: x * 2)
-_null_atk = ("0x", lambda x: x * 0)
-_negative_two_atk = ("-2", lambda x: x - 2)
-_negative_one_atk = ("-1", lambda x: x - 1)
-_plus_zero_atk = ("+0", lambda x: x)
-_plus_one_atk = ("+1", lambda x: x + 1)
-_plus_two_atk = ("+2", lambda x: x + 2)
+_times_2_atk = ("2x", lambda x: x * 2)
+_times_0_atk = ("0x", lambda x: x * 0)
+_minus_2_atk = ("-2", lambda x: x - 2)
+_minus_1_atk = ("-1", lambda x: x - 1)
+_plus_0_atk = ("+0", lambda x: x)
+_plus_1_atk = ("+1", lambda x: x + 1)
+_plus_2_atk = ("+2", lambda x: x + 2)
+_plus_3_atk = ("+3", lambda x: x + 3)
 
-times_two = Card(_times_two_atk, False)
-null_card = Card(_null_atk, False)
-negative_two = Card(_negative_two_atk, False)
-negative_one = Card(_negative_one_atk, False)
-plus_zero = Card(_plus_zero_atk, False)
-plus_one = Card(_plus_one_atk, False)
-plus_two = Card(_plus_two_atk, False)
+times_2 = Card(_times_2_atk, False)
+times_0 = Card(_times_0_atk, False)
+minus_2 = Card(_minus_2_atk, False)
+minus_1 = Card(_minus_1_atk, False)
+plus_0 = Card(_plus_0_atk, False)
+plus_1 = Card(_plus_1_atk, False)
+plus_2 = Card(_plus_2_atk, False)
+plus_3 = Card(_plus_3_atk, False)
 
-rolling_plus_one = Card(_plus_one_atk, True)
-rolling_plus_zero_muddle = Card(_plus_zero_atk, True, singular_effect="Muddle")
-rolling_plus_zero_pierce_3 = Card(_plus_zero_atk, True, countable_effect="Pierce_3")
-rolling_plus_zero_stun = Card(_plus_zero_atk, True, singular_effect="Stun")
-rolling_plus_zero_add_target = Card(_plus_zero_atk, True, countable_effect="Add_Target")
-plus_one_refresh_item = Card(_plus_one_atk, False, countable_effect="Refresh_Item")
+rolling_plus_1 = Card(_plus_1_atk, True)
+rolling_plus_0_muddle = Card(_plus_0_atk, True, singular_effect="Muddle")
+rolling_plus_0_disarm = Card(_plus_0_atk, True, singular_effect="Disarm")
+rolling_plus_0_stun = Card(_plus_0_atk, True, singular_effect="Stun")
+rolling_plus_0_pierce_3 = Card(_plus_0_atk, True, countable_effect="Pierce_3")
+rolling_plus_0_add_target = Card(_plus_0_atk, True, countable_effect="Add_Target")
+rolling_plus_0_push_1 = Card(_plus_0_atk, True, countable_effect="Push_1")
 
-plus_zero_fire = Card(_plus_zero_atk, False, singular_effect="Fire")
-plus_zero_ice = Card(_plus_zero_atk, False, singular_effect="Ice")
-plus_zero_air = Card(_plus_zero_atk, False, singular_effect="Air")
-plus_zero_earth = Card(_plus_zero_atk, False, singular_effect="Earth")
+plus_0_fire = Card(_plus_0_atk, False, singular_effect="Fire")
+plus_0_ice = Card(_plus_0_atk, False, singular_effect="Ice")
+plus_0_air = Card(_plus_0_atk, False, singular_effect="Air")
+plus_0_earth = Card(_plus_0_atk, False, singular_effect="Earth")
+plus_0_light = Card(_plus_0_atk, False, singular_effect="Light")
+plus_0_dark = Card(_plus_0_atk, False, singular_effect="Dark")
 
-plus_one_push_one = Card(_plus_one_atk, False, countable_effect="Push_1")
-plus_one_wound = Card(_plus_one_atk, False, singular_effect="Wound")
-plus_zero_stun = Card(_plus_zero_atk, False, singular_effect="Stun")
-plus_zero_add_target = Card(_plus_zero_atk, False, countable_effect="Add_Target")
+plus_0_stun = Card(_plus_0_atk, False, singular_effect="Stun")
+plus_0_add_target = Card(_plus_0_atk, False, countable_effect="Add_Target")
+plus_0_refresh_item = Card(_plus_0_atk, False, countable_effect="Refresh_Item")
+plus_1_push_1 = Card(_plus_1_atk, False, countable_effect="Push_1")
+plus_1_wound = Card(_plus_1_atk, False, singular_effect="Wound")
+plus_1_shield_1_self = Card(_plus_1_atk, False, countable_effect="Shield_1")
