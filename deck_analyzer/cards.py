@@ -1,11 +1,14 @@
-from typing import Callable, Tuple, Optional
+from typing import Callable, Tuple, Optional, NamedTuple
 
-Atk_Bonus = Tuple[str, Callable[[int], int]]
+
+class AtkBonus(NamedTuple):
+    display: str
+    calculation: Callable[[int], int]
 
 
 class Card:
-    def __init__(self, bonus: Atk_Bonus, rolling: bool,
-                 countable_effect: Optional[str]=None, singular_effect: Optional[str]=None):
+    def __init__(self, bonus: AtkBonus, rolling: bool,
+                 countable_effect: Optional[str] = None, singular_effect: Optional[str] = None):
         self.bonus = bonus
         self.rolling = rolling
         self.singular_effect = singular_effect
@@ -15,7 +18,7 @@ class Card:
         self.has_effect = singular_effect or countable_effect
 
         text = "R" if rolling else ""
-        text += bonus[0]
+        text += bonus.display
         if countable_effect:
             text += " " + countable_effect
         if singular_effect:
@@ -24,8 +27,8 @@ class Card:
         self.text = text
 
     def adv_compare(self, other, atk: int):
-        atk1 = self.bonus[1](atk)
-        atk2 = other.bonus[1](atk)
+        atk1 = self.bonus.calculation(atk)
+        atk2 = other.bonus.calculation(atk)
         if not self.has_effect and not other.has_effect:
             if atk1 > atk2:
                 return 1
@@ -58,14 +61,14 @@ class Card:
                                                      self.countable_effect, self.singular_effect)
 
 
-_times_2_atk = ("2x", lambda x: x * 2)
-_times_0_atk = ("0x", lambda x: x * 0)
-_minus_2_atk = ("-2", lambda x: x - 2)
-_minus_1_atk = ("-1", lambda x: x - 1)
-_plus_0_atk = ("+0", lambda x: x)
-_plus_1_atk = ("+1", lambda x: x + 1)
-_plus_2_atk = ("+2", lambda x: x + 2)
-_plus_3_atk = ("+3", lambda x: x + 3)
+_times_2_atk = AtkBonus("2x", lambda x: x * 2)
+_times_0_atk = AtkBonus("0x", lambda x: x * 0)
+_minus_2_atk = AtkBonus("-2", lambda x: x - 2)
+_minus_1_atk = AtkBonus("-1", lambda x: x - 1)
+_plus_0_atk = AtkBonus("+0", lambda x: x)
+_plus_1_atk = AtkBonus("+1", lambda x: x + 1)
+_plus_2_atk = AtkBonus("+2", lambda x: x + 2)
+_plus_3_atk = AtkBonus("+3", lambda x: x + 3)
 
 times_2 = Card(_times_2_atk, False)
 times_0 = Card(_times_0_atk, False)
