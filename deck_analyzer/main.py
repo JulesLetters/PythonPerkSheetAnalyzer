@@ -12,14 +12,15 @@ from deck_analyzer import perk_sheets, deck_generator
 from deck_analyzer.cards import Card
 from deck_analyzer.simple_timer_context import SimpleTimerContext
 
-ATK_RANGE = range(0, 26)
+ATK_RANGE = range(0, 4)
 EITHER_ORDER = 2
-AggregateLine = namedtuple("AggregateLine", "atk_calculation countable_effects singular_effects")
-AggregateLineWithOdds = namedtuple("AggregateLineWithOdds", "aggregate_line odds")
-Statistics = namedtuple("Statistics", "normal advantage")
+AggregatedLine = namedtuple("AggregatedLine", "atk_calculation countable_effects singular_effects")
+AggregatedLineWithOdds = namedtuple("AggregatedLineWithOdds", "aggregated_line odds")
+DeckStatistics = namedtuple("DeckStatistics", "normal advantage")
+Analysis = namedtuple("Analysis", "statistics_by_atk generation_methods")
 
 
-def make_aggregate_line_results(line: Iterable[Card]) -> AggregateLine:
+def make_aggregated_line_from_line(line: Iterable[Card]) -> AggregatedLine:
     atk_calculation = []
     countable_effects = Counter()
     singular_effects = {}
@@ -31,10 +32,14 @@ def make_aggregate_line_results(line: Iterable[Card]) -> AggregateLine:
         if card.singular_effect:
             singular_effects[card.singular_effect] = True
 
-    return AggregateLine(atk_calculation, countable_effects, singular_effects)
+    return AggregatedLine(atk_calculation, countable_effects, singular_effects)
 
 
-def add_card_to_aggregate_line_results(card: Card, aggregate: AggregateLine) -> AggregateLine:
+def make_aggregated_line_from_card(card: Card) -> AggregatedLine:
+    return make_aggregated_line_from_line([card])
+
+
+def add_card_to_aggregated_line(card: Card, aggregate: AggregatedLine) -> AggregatedLine:
     atk_calculation = aggregate.atk_calculation + [card.bonus]
 
     if card.countable_effect:
@@ -49,14 +54,10 @@ def add_card_to_aggregate_line_results(card: Card, aggregate: AggregateLine) -> 
     else:
         singular_effects = aggregate.singular_effects
 
-    return AggregateLine(atk_calculation, countable_effects, singular_effects)
+    return AggregatedLine(atk_calculation, countable_effects, singular_effects)
 
 
-def card_to_aggregate_line(card: Card) -> AggregateLine:
-    return make_aggregate_line_results([card])
-
-
-class DeckStatistics:
+class DrawSchemeStatistics:
     def __init__(self) -> None:
         self.countable_effect_odds = defaultdict(Fraction)
         self.singular_effect_odds = defaultdict(Fraction)
@@ -64,7 +65,7 @@ class DeckStatistics:
         self.expected_damage = Fraction()
         self.attack_calculations = defaultdict(Fraction)
 
-    def add_aggregate(self, aggregate: AggregateLine, odds: Fraction) -> None:
+    def add_aggregated_line(self, aggregate: AggregatedLine, odds: Fraction) -> None:
         for effect, count in aggregate.countable_effects.items():
             self.countable_effect_odds[(effect, count)] += odds
             self.singular_effect_odds[effect] += odds  # Chance a countable occurred.
@@ -83,7 +84,7 @@ class DeckStatistics:
             self.expected_damage += damage_from_card_sequence * odds
 
     def make_copy(self):
-        copy = DeckStatistics()
+        copy = DrawSchemeStatistics()
         copy.countable_effect_odds = self.countable_effect_odds.copy()
         copy.singular_effect_odds = self.singular_effect_odds.copy()
         copy.total_odds = self.total_odds
@@ -92,8 +93,8 @@ class DeckStatistics:
         return copy
 
 
-def analyze_deck(deck, atk_range) -> Dict[int, Statistics]:
-    statistics = Statistics(DeckStatistics(), DeckStatistics())
+def derive_statistics(deck, atk_range) -> Dict[int, DeckStatistics]:
+    statistics = DeckStatistics(DrawSchemeStatistics(), DrawSchemeStatistics())
 
     # Possible optimization: Pre-calculate denominators involving deck_length and sequence_length.
 
@@ -108,9 +109,8 @@ def analyze_deck(deck, atk_range) -> Dict[int, Statistics]:
 
     for terminator_card, count in counted_terminator_cards.items():
         odds = Fraction(count, deck_length)
-        terminated_aggregate = card_to_aggregate_line(terminator_card)
-
-        statistics.normal.add_aggregate(terminated_aggregate, odds)
+        terminated_aggregate = make_aggregated_line_from_card(terminator_card)
+        statistics.normal.add_aggregated_line(terminated_aggregate, odds)
 
     short_rolling_combinations = Counter()
     short_rolling_combinations.update([FrozenMultiset(c) for c in itertools.combinations(rolling_cards, 1)])
@@ -125,30 +125,33 @@ def analyze_deck(deck, atk_range) -> Dict[int, Statistics]:
     short_rolling = analyze_rolling_combos(counted_terminator_cards, deck_length, short_rolling_combinations)
     for terminated_line in short_rolling:
         # Advantage gets odds times two because either order can happen and count when advantaged.
-        statistics.advantage.add_aggregate(terminated_line.aggregate_line, terminated_line.odds * EITHER_ORDER)
-        statistics.normal.add_aggregate(terminated_line.aggregate_line, terminated_line.odds)
+        statistics.advantage.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds * EITHER_ORDER)
+        statistics.normal.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds)
 
     lengthy_rolling = analyze_rolling_combos(counted_terminator_cards, deck_length, lengthy_rolling_combinations)
     for terminated_line in lengthy_rolling:
-        statistics.advantage.add_aggregate(terminated_line.aggregate_line, terminated_line.odds)
-        statistics.normal.add_aggregate(terminated_line.aggregate_line, terminated_line.odds)
+        statistics.advantage.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds)
+        statistics.normal.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds)
 
+    # Split between critical and non-critical terminators.
+    # Critical x Non-critical are mixed in the double terminal section.
     critical_terminators = [c for c in terminator_cards if c.is_critical]
     non_critical_terminators = [c for c in terminator_cards if not c.is_critical]
 
+    # Avoid doing pointless iterations of comparing x2. This won't happen without bless, shuffles, or redraws.
     critical_terminator_count = len(critical_terminators)
     any_critical_card = critical_terminators[0]
     if critical_terminator_count > 1:
         double_critical_odds = Fraction(critical_terminator_count * (critical_terminator_count - 1), deck_length)
-        al = card_to_aggregate_line(any_critical_card)
-        statistics.advantage.add_aggregate(al, double_critical_odds)
+        al = make_aggregated_line_from_card(any_critical_card)
+        statistics.advantage.add_aggregated_line(al, double_critical_odds)
 
     two_card_odds_denominator = Fraction(1, deck_length * (deck_length - 1))
-    advantage_terminators = list(itertools.combinations(non_critical_terminators, 2))
+    advantaged_terminator_pairs = list(itertools.combinations(non_critical_terminators, 2))
     result = {}
     for atk in atk_range:
-        new_statistics = Statistics(statistics.normal.make_copy(), statistics.advantage.make_copy())
-        for terminator_pair in advantage_terminators:
+        new_statistics = DeckStatistics(statistics.normal.make_copy(), statistics.advantage.make_copy())
+        for terminator_pair in advantaged_terminator_pairs:
             add_terminal_adv_to_stats(new_statistics.advantage, terminator_pair, atk, two_card_odds_denominator)
 
         for terminator in non_critical_terminators:
@@ -160,36 +163,40 @@ def analyze_deck(deck, atk_range) -> Dict[int, Statistics]:
         result[atk].normal.calculate_expected_damage(atk)
         result[atk].advantage.calculate_expected_damage(atk)
 
+    # for i in ATK_RANGE:
+    #     assert result[i].normal.total_odds == 1  # Debug assertion
+    #     assert result[i].advantage.total_odds == 1  # Debug assertion
+
     return result
 
 
 def add_terminal_adv_to_stats(advantage_stats, terminator_pair, atk, two_card_odds_denominator):
     cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
     if cmp == -1:
-        al = card_to_aggregate_line(terminator_pair[1])
-        advantage_stats.add_aggregate(al, two_card_odds_denominator * EITHER_ORDER)
+        al = make_aggregated_line_from_card(terminator_pair[1])
+        advantage_stats.add_aggregated_line(al, two_card_odds_denominator * EITHER_ORDER)
     elif cmp == 1:
-        al = card_to_aggregate_line(terminator_pair[0])
-        advantage_stats.add_aggregate(al, two_card_odds_denominator * EITHER_ORDER)
+        al = make_aggregated_line_from_card(terminator_pair[0])
+        advantage_stats.add_aggregated_line(al, two_card_odds_denominator * EITHER_ORDER)
     else:
-        a = card_to_aggregate_line(terminator_pair[0])
-        advantage_stats.add_aggregate(a, two_card_odds_denominator)
-        b = card_to_aggregate_line(terminator_pair[1])
-        advantage_stats.add_aggregate(b, two_card_odds_denominator)
+        a = make_aggregated_line_from_card(terminator_pair[0])
+        advantage_stats.add_aggregated_line(a, two_card_odds_denominator)
+        b = make_aggregated_line_from_card(terminator_pair[1])
+        advantage_stats.add_aggregated_line(b, two_card_odds_denominator)
 
 
-def analyze_rolling_combos(counted_terminator_cards, deck_length, rolling_combinations) -> List[AggregateLineWithOdds]:
+def analyze_rolling_combos(counted_terminator_cards, deck_length, rolling_combinations) -> List[AggregatedLineWithOdds]:
     result = []
     for line, line_occurrence_count in rolling_combinations.items():
         rolling_permutations = line_occurrence_count * math.factorial(len(line))
-        aggregate_line_results = make_aggregate_line_results(line)
+        aggregated_line = make_aggregated_line_from_line(line)
         sequence_length = len(line) + 1
         denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
         for terminator_card, count in counted_terminator_cards.items():
             odds = Fraction(rolling_permutations * count, denominator)
-            terminated_aggregate = add_card_to_aggregate_line_results(terminator_card, aggregate_line_results)
+            terminated_aggregate = add_card_to_aggregated_line(terminator_card, aggregated_line)
 
-            result.append(AggregateLineWithOdds(terminated_aggregate, odds))
+            result.append(AggregatedLineWithOdds(terminated_aggregate, odds))
 
     return result
 
@@ -207,15 +214,12 @@ def main():
             if n % 100 == 0:
                 print(".", end="", flush=True)
 
-            statistics_by_atk = analyze_deck(deck, ATK_RANGE)
-            all_analysis[deck] = {'statistics': statistics_by_atk, 'generation_methods': generation_methods}
-            # for i in ATK_RANGE:
-            #     assert all_analysis[deck]['statistics'][i].normal.total_odds == 1  # Debug assertion
-            #     assert all_analysis[deck]['statistics'][i].advantage.total_odds == 1  # Debug assertion
+            statistics_by_atk = derive_statistics(deck, ATK_RANGE)
+            all_analysis[deck] = Analysis(statistics_by_atk, generation_methods)
         print("")
 
     maximum_damage_example(all_analysis)
-    # three_spears_refresh_item_example(all_analysis)
+    three_spears_refresh_item_example(all_analysis)
 
     print('Done!')
 
@@ -224,8 +228,8 @@ def maximum_damage_example(all_analysis):
     chosen_atk = 3
     decks_by_expected_damage = defaultdict(list)
     for deck, analysis in all_analysis.items():
-        expected_damage = analysis['statistics'][chosen_atk].normal.expected_damage
-        decks_by_expected_damage[expected_damage].append(analysis['generation_methods'])
+        expected_damage = analysis.statistics_by_atk[chosen_atk].normal.expected_damage
+        decks_by_expected_damage[expected_damage].append(analysis.generation_methods)
 
     level_9_decks = defaultdict(list)
     for expected_damage, generation_methods in decks_by_expected_damage.items():
@@ -248,8 +252,8 @@ def three_spears_refresh_item_example(all_analysis):
     chosen_atk = 3
     all_deck_at_given_atk_statistics = {}
     for deck, analysis in all_analysis.items():
-        statistics_at_chosen_atk = analysis['statistics'][chosen_atk]
-        generation_methods = analysis['generation_methods']
+        statistics_at_chosen_atk = analysis.statistics_by_atk[chosen_atk]
+        generation_methods = analysis.generation_methods
         all_deck_at_given_atk_statistics[deck] = {'statistics': statistics_at_chosen_atk,
                                                   'generation_methods': generation_methods}
 
