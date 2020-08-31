@@ -154,7 +154,7 @@ def ignore_negative_item_and_add_one_plus_1(deck: Deck) -> None:
 # IGNORE NEGATIVE SCENARIO EFFECTS HERE
 
 
-def add_two_plus_2_and_one_minus_2(deck: Deck) -> None:
+def add_one_minus_2_and_two_plus_2(deck: Deck) -> None:
     deck.append(cards.minus_2)
     deck.append(cards.plus_2)
     deck.append(cards.plus_2)
@@ -183,12 +183,12 @@ def add_two_rolling_plus_0_air(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_air)
 
 
-def add_one_rolling_plus_0_earth_and_add_one_rolling_plus_0_air(deck: Deck) -> None:
+def add_one_rolling_plus_0_earth_and_one_rolling_plus_0_air(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_air)
     deck.append(cards.rolling_plus_0_earth)
 
 
-def add_one_rolling_plus_0_light_and_add_one_rolling_plus_0_dark(deck: Deck) -> None:
+def add_one_rolling_plus_0_light_and_one_rolling_plus_0_dark(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_light)
     deck.append(cards.rolling_plus_0_dark)
 
@@ -228,7 +228,7 @@ def add_two_rolling_plus_0_immobilize(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_immobilize)
 
 
-def add_one_rolling_plus_0_disarm_and_add_one_rolling_plus_0_muddle(deck: Deck) -> None:
+def add_one_rolling_plus_0_disarm_and_one_rolling_plus_0_muddle(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_disarm)
     deck.append(cards.rolling_plus_0_muddle)
 
@@ -382,7 +382,7 @@ def add_three_rolling_plus_1(deck: Deck) -> None:
     deck.append(cards.rolling_plus_1)
 
 
-def add_one_rolling_plus_0_fire_and_add_one_rolling_plus_0_air(deck: Deck) -> None:
+def add_one_rolling_plus_0_fire_and_one_rolling_plus_0_air(deck: Deck) -> None:
     deck.append(cards.rolling_plus_0_fire)
     deck.append(cards.rolling_plus_0_air)
 

@@ -1,5 +1,112 @@
 import deck_analyzer.perks as perks
 
+brute = [
+    perks.remo_two_minus_1,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.add_two_plus_1,
+    perks.add_two_plus_1,
+    perks.add_one_plus_3,
+    perks.add_three_rolling_plus_0_push_1,
+    perks.add_three_rolling_plus_0_push_1,
+    perks.add_two_rolling_plus_0_pierce_3,
+    perks.add_one_rolling_plus_0_stun,
+    perks.add_one_rolling_plus_0_stun,
+    perks.add_one_rolling_plus_0_disarm_and_one_rolling_plus_0_muddle,
+    perks.add_one_rolling_plus_0_disarm_and_one_rolling_plus_0_muddle,
+    perks.add_one_rolling_plus_0_add_target,
+    perks.add_one_rolling_plus_0_add_target,
+    perks.add_one_plus_1_shield_1_self,
+    perks.ignore_negative_item_and_add_one_plus_1
+]
+
+scoundrel = [
+    perks.remo_two_minus_1,
+    perks.remo_two_minus_1,
+    perks.remo_four_plus_0,
+    perks.repl_one_minus_2_w_one_plus_0,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.repl_one_plus_0_w_one_plus_2,
+    perks.repl_one_plus_0_w_one_plus_2,
+    perks.add_two_rolling_plus_0_pierce_3,
+    perks.add_two_rolling_plus_0_poison,
+    perks.add_two_rolling_plus_0_poison,
+    perks.add_two_rolling_plus_0_muddle,
+    perks.add_one_rolling_plus_0_invisible_self,
+    # perks.ignore_negative_scenario
+]
+
+spellweaver = [
+    perks.remo_four_plus_0,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.add_two_plus_1,
+    perks.add_two_plus_1,
+    perks.add_one_plus_0_stun,
+    perks.add_one_plus_1_wound,
+    perks.add_one_plus_1_immobilize,
+    perks.add_one_plus_1_curse,
+    perks.add_one_plus_2_fire,
+    perks.add_one_plus_2_fire,
+    perks.add_one_plus_2_ice,
+    perks.add_one_plus_2_ice,
+    perks.add_one_rolling_plus_0_earth_and_one_rolling_plus_0_air,
+    perks.add_one_rolling_plus_0_light_and_one_rolling_plus_0_dark
+]
+
+mindthief = [
+    perks.remo_two_minus_1,
+    perks.remo_two_minus_1,
+    perks.remo_four_plus_0,
+    perks.repl_two_plus_1_w_two_plus_2,
+    perks.repl_one_minus_2_w_one_plus_0,
+    perks.add_one_plus_2_ice,
+    perks.add_one_plus_2_ice,
+    perks.add_two_rolling_plus_1,
+    perks.add_two_rolling_plus_1,
+    perks.add_three_rolling_plus_0_pull_1,
+    perks.add_three_rolling_plus_0_muddle,
+    perks.add_two_rolling_plus_0_immobilize,
+    perks.add_one_rolling_plus_0_stun,
+    perks.add_one_rolling_plus_0_disarm_and_one_rolling_plus_0_muddle,
+    # perks.ignore_negative_scenario
+]
+
+cragheart = [
+    perks.remo_four_plus_0,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.repl_one_minus_1_w_one_plus_1,
+    perks.add_one_minus_2_and_two_plus_2,
+    perks.add_one_plus_1_immobilize,
+    perks.add_one_plus_1_immobilize,
+    perks.add_one_plus_2_muddle,
+    perks.add_one_plus_2_muddle,
+    perks.add_two_rolling_plus_0_push_2,
+    perks.add_two_rolling_plus_0_earth,
+    perks.add_two_rolling_plus_0_earth,
+    perks.add_two_rolling_plus_0_air,
+    # perks.ignore_negative_item,
+    # perks.ignore_negative_scenario
+]
+
+tinkerer = [
+    perks.remo_two_minus_1,
+    perks.remo_two_minus_1,
+    perks.repl_one_minus_2_w_one_plus_0,
+    perks.add_two_plus_1,
+    perks.add_one_plus_3,
+    perks.add_two_rolling_plus_0_fire,
+    perks.add_three_rolling_plus_0_muddle,
+    perks.add_one_plus_1_wound,
+    perks.add_one_plus_1_wound,
+    perks.add_one_plus_1_immobilize,
+    perks.add_one_plus_1_immobilize,
+    perks.add_one_plus_1_heal_2_self,
+    perks.add_one_plus_1_heal_2_self,
+    perks.add_one_plus_0_add_target,
+    # perks.ignore_negative_scenario
+]
+
 three_spears = [
     perks.remo_two_minus_1,
     perks.remo_two_minus_1,
