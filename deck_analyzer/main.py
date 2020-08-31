@@ -249,6 +249,7 @@ def maximum_damage_example(all_analysis):
 
 
 def three_spears_refresh_item_example(all_analysis):
+    print("Ways to maximum Refresh Item, with Advantage:")
     chosen_atk = 3
     all_deck_at_given_atk_statistics = {}
     for deck, analysis in all_analysis.items():
@@ -259,7 +260,7 @@ def three_spears_refresh_item_example(all_analysis):
 
     decks_by_odds = defaultdict(list)
     for deck, analysis in all_deck_at_given_atk_statistics.items():
-        odds = analysis['statistics'].advantage.countable_effect_odds[("Refresh_Item", 1)]
+        odds = analysis['statistics'].advantage.countable_effect_odds[("Refresh_Item_Self", 1)]
         decks_by_odds[odds].append(analysis['generation_methods'])
 
     level_9_decks = defaultdict(list)
@@ -269,10 +270,11 @@ def three_spears_refresh_item_example(all_analysis):
             if len(method[0]) >= 8:
                 level_9_decks[odds].append(method)
     top_four_odds = sorted(level_9_decks.keys())[-4:]
-    print(top_four_odds)
+    print("Top four odds: ", top_four_odds)
 
     for odds in top_four_odds:
         print(odds)
+        print("Ways to generate this deck:")
         for generation_methods in level_9_decks[odds]:
             for generation_method in generation_methods:
                 perk_names = [perk.name for perk in generation_method]
