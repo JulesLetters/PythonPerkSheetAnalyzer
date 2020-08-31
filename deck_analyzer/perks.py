@@ -591,3 +591,8 @@ def repl_one_plus_0_w_one_plus_1_earth(deck: Deck) -> None:
 
 def remo_one_minus_2(deck: Deck) -> None:
     deck.remove(cards.minus_2)
+
+
+def add_two_plus_2(deck: Deck) -> None:
+    deck.append(cards.plus_2)
+    deck.append(cards.plus_2)
