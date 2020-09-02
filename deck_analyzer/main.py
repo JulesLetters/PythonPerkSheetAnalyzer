@@ -4,57 +4,19 @@ import operator
 from collections import Counter, defaultdict, namedtuple
 from fractions import Fraction
 from functools import reduce
-from typing import Iterable, List, Dict
+from typing import List, Dict
 
 from multiset import FrozenMultiset
 
 from deck_analyzer import perk_sheets, deck_generator
-from deck_analyzer.cards import Card
+from deck_analyzer.aggregated_line import AggregatedLine
 from deck_analyzer.simple_timer_context import SimpleTimerContext
 
 ATK_RANGE = range(0, 4)
 EITHER_ORDER = 2
-AggregatedLine = namedtuple("AggregatedLine", "atk_calculation countable_effects singular_effects")
 AggregatedLineWithOdds = namedtuple("AggregatedLineWithOdds", "aggregated_line odds")
 DeckStatistics = namedtuple("DeckStatistics", "normal advantage")
 Analysis = namedtuple("Analysis", "statistics_by_atk generation_methods")
-
-
-def make_aggregated_line_from_line(line: Iterable[Card]) -> AggregatedLine:
-    atk_calculation = []
-    countable_effects = Counter()
-    singular_effects = {}
-    for card in line:
-        # Another optimization is to intelligently combine the functions.
-        atk_calculation.append(card.bonus)
-        if card.countable_effect:
-            countable_effects[card.countable_effect] += 1
-        if card.singular_effect:
-            singular_effects[card.singular_effect] = True
-
-    return AggregatedLine(atk_calculation, countable_effects, singular_effects)
-
-
-def make_aggregated_line_from_card(card: Card) -> AggregatedLine:
-    return make_aggregated_line_from_line([card])
-
-
-def add_card_to_aggregated_line(card: Card, aggregate: AggregatedLine) -> AggregatedLine:
-    atk_calculation = aggregate.atk_calculation + [card.bonus]
-
-    if card.countable_effect:
-        countable_effects = aggregate.countable_effects.copy()
-        countable_effects[card.countable_effect] += 1
-    else:
-        countable_effects = aggregate.countable_effects
-
-    if card.singular_effect:
-        singular_effects = aggregate.singular_effects.copy()
-        singular_effects[card.singular_effect] = True
-    else:
-        singular_effects = aggregate.singular_effects
-
-    return AggregatedLine(atk_calculation, countable_effects, singular_effects)
 
 
 class DrawSchemeStatistics:
@@ -109,7 +71,7 @@ def derive_statistics(deck, atk_range) -> Dict[int, DeckStatistics]:
 
     for terminator_card, count in counted_terminator_cards.items():
         odds = Fraction(count, deck_length)
-        terminated_aggregate = make_aggregated_line_from_card(terminator_card)
+        terminated_aggregate = AggregatedLine.from_card(terminator_card)
         statistics.normal.add_aggregated_line(terminated_aggregate, odds)
 
     short_rolling_combinations = Counter()
@@ -143,7 +105,7 @@ def derive_statistics(deck, atk_range) -> Dict[int, DeckStatistics]:
     any_critical_card = critical_terminators[0]
     if critical_terminator_count > 1:
         double_critical_odds = Fraction(critical_terminator_count * (critical_terminator_count - 1), deck_length)
-        al = make_aggregated_line_from_card(any_critical_card)
+        al = AggregatedLine.from_card(any_critical_card)
         statistics.advantage.add_aggregated_line(al, double_critical_odds)
 
     two_card_odds_denominator = Fraction(1, deck_length * (deck_length - 1))
@@ -173,15 +135,15 @@ def derive_statistics(deck, atk_range) -> Dict[int, DeckStatistics]:
 def add_terminal_adv_to_stats(advantage_stats, terminator_pair, atk, two_card_odds_denominator):
     cmp = terminator_pair[0].adv_compare(terminator_pair[1], atk)
     if cmp == -1:
-        al = make_aggregated_line_from_card(terminator_pair[1])
+        al = AggregatedLine.from_card(terminator_pair[1])
         advantage_stats.add_aggregated_line(al, two_card_odds_denominator * EITHER_ORDER)
     elif cmp == 1:
-        al = make_aggregated_line_from_card(terminator_pair[0])
+        al = AggregatedLine.from_card(terminator_pair[0])
         advantage_stats.add_aggregated_line(al, two_card_odds_denominator * EITHER_ORDER)
     else:
-        a = make_aggregated_line_from_card(terminator_pair[0])
+        a = AggregatedLine.from_card(terminator_pair[0])
         advantage_stats.add_aggregated_line(a, two_card_odds_denominator)
-        b = make_aggregated_line_from_card(terminator_pair[1])
+        b = AggregatedLine.from_card(terminator_pair[1])
         advantage_stats.add_aggregated_line(b, two_card_odds_denominator)
 
 
@@ -189,12 +151,12 @@ def analyze_rolling_combos(counted_terminator_cards, deck_length, rolling_combin
     result = []
     for line, line_occurrence_count in rolling_combinations.items():
         rolling_permutations = line_occurrence_count * math.factorial(len(line))
-        aggregated_line = make_aggregated_line_from_line(line)
+        aggregated_line = AggregatedLine.from_line(line)
         sequence_length = len(line) + 1
         denominator = reduce(operator.mul, range(deck_length, deck_length - sequence_length, -1), 1)
         for terminator_card, count in counted_terminator_cards.items():
             odds = Fraction(rolling_permutations * count, denominator)
-            terminated_aggregate = add_card_to_aggregated_line(terminator_card, aggregated_line)
+            terminated_aggregate = aggregated_line.add_card(terminator_card)
 
             result.append(AggregatedLineWithOdds(terminated_aggregate, odds))
 
