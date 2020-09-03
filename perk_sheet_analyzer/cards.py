@@ -1,4 +1,4 @@
-from typing import Callable, Tuple, Optional, NamedTuple
+from typing import Callable, Optional, NamedTuple
 
 
 class AtkBonus(NamedTuple):

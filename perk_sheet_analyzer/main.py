@@ -1,15 +1,23 @@
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, List, Dict
 
-from perk_sheet_analyzer import perk_sheets, deck_generator
-from perk_sheet_analyzer.deck_analyzer import derive_statistics
+from multiset import FrozenMultiset
+
+from perk_sheet_analyzer import perk_sheets, deck_generator, deck_analyzer
+from perk_sheet_analyzer.deck_analyzer import DeckStatistics
+from perk_sheet_analyzer.deck_generator import NamedPerk
 from perk_sheet_analyzer.simple_timer_context import SimpleTimerContext
 
-ATK_RANGE = range(0, 4)
-Analysis = namedtuple("Analysis", "statistics_by_atk generation_methods")
+
+class Analysis(NamedTuple):
+    statistics_by_atk: Dict[int, DeckStatistics]
+    generation_methods: List[List[NamedPerk]]
 
 
 def main():
+    atk_range = range(0, 4)
     decks_and_generation_methods = deck_generator.all_decks_and_generations_for(perk_sheets.three_spears)
+
     deck_count = len(decks_and_generation_methods)
     print("Decks to analyze: {}".format(deck_count))
 
@@ -21,7 +29,7 @@ def main():
             if n % 100 == 0:
                 print(".", end="", flush=True)
 
-            statistics_by_atk = derive_statistics(deck, ATK_RANGE)
+            statistics_by_atk = deck_analyzer.derive_statistics(deck, atk_range)
             all_analysis[deck] = Analysis(statistics_by_atk, generation_methods)
         print("")
 
@@ -31,7 +39,7 @@ def main():
     print('Done!')
 
 
-def maximum_damage_example(all_analysis):
+def maximum_damage_example(all_analysis: Dict[FrozenMultiset, Analysis]) -> None:
     chosen_atk = 3
     decks_by_expected_damage = defaultdict(list)
     for deck, analysis in all_analysis.items():
@@ -55,7 +63,7 @@ def maximum_damage_example(all_analysis):
                 print(perk_names)
 
 
-def three_spears_refresh_item_example(all_analysis):
+def three_spears_refresh_item_example(all_analysis: Dict[FrozenMultiset, Analysis]) -> None:
     print("Ways to maximum Refresh Item, with Advantage:")
     chosen_atk = 3
     all_deck_at_given_atk_statistics = {}

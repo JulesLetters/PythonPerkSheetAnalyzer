@@ -2,6 +2,7 @@ import itertools
 import math
 import operator
 from collections import namedtuple, Counter, defaultdict
+from dataclasses import dataclass
 from fractions import Fraction
 from functools import reduce
 from typing import Dict, List
@@ -13,7 +14,12 @@ from perk_sheet_analyzer.draw_scheme_statistics import DrawSchemeStatistics
 
 EITHER_ORDER = 2
 AggregatedLineWithOdds = namedtuple("AggregatedLineWithOdds", "aggregated_line odds")
-DeckStatistics = namedtuple("DeckStatistics", "normal advantage")
+
+
+@dataclass
+class DeckStatistics:
+    normal: DrawSchemeStatistics
+    advantage: DrawSchemeStatistics
 
 
 def derive_statistics(deck: FrozenMultiset, atk_range: range) -> Dict[int, DeckStatistics]:

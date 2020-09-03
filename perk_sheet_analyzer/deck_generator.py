@@ -1,10 +1,11 @@
 import itertools
 from collections import defaultdict
-from typing import List, Callable, Dict, Iterable, NamedTuple
+from typing import List, Dict, Iterable, NamedTuple
 
 from multiset import FrozenMultiset
 
 import perk_sheet_analyzer.cards as cards
+from perk_sheet_analyzer.perks import Perk
 
 _default_deck = [cards.plus_0] * 6 + [cards.plus_1] * 5 + [cards.minus_1] * 5 + \
                 [cards.minus_2, cards.plus_2, cards.times_0, cards.times_2]
@@ -14,16 +15,13 @@ def get_default_deck() -> FrozenMultiset:
     return FrozenMultiset(_default_deck)
 
 
-Perk = Callable[[List[str]], None]
-
-
 class NamedPerk(NamedTuple):
     name: str
     deck_modification: Perk
 
 
-def all_decks_and_generations_for(perk_functions: List[Perk]) -> Dict[FrozenMultiset, List[List[NamedPerk]]]:
-    named_perks = [NamedPerk(p.__name__, p) for p in perk_functions]
+def all_decks_and_generations_for(perks: List[Perk]) -> Dict[FrozenMultiset, List[List[NamedPerk]]]:
+    named_perks = [NamedPerk(p.__name__, p) for p in perks]
 
     # Get all unique combinations of perks.
     perk_combinations = []
