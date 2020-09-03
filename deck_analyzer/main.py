@@ -10,7 +10,7 @@ from multiset import FrozenMultiset
 
 from deck_analyzer import perk_sheets, deck_generator
 from deck_analyzer.aggregated_line import AggregatedLine
-from deck_analyzer.deck_scheme_statistics import DrawSchemeStatistics
+from deck_analyzer.draw_scheme_statistics import DrawSchemeStatistics
 from deck_analyzer.simple_timer_context import SimpleTimerContext
 
 ATK_RANGE = range(0, 4)
