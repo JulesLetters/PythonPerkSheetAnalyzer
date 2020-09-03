@@ -8,10 +8,10 @@ from typing import List, Dict
 
 from multiset import FrozenMultiset
 
-from deck_analyzer import perk_sheets, deck_generator
-from deck_analyzer.aggregated_line import AggregatedLine
-from deck_analyzer.draw_scheme_statistics import DrawSchemeStatistics
-from deck_analyzer.simple_timer_context import SimpleTimerContext
+from perk_sheet_analyzer import perk_sheets, deck_generator
+from perk_sheet_analyzer.aggregated_line import AggregatedLine
+from perk_sheet_analyzer.draw_scheme_statistics import DrawSchemeStatistics
+from perk_sheet_analyzer.simple_timer_context import SimpleTimerContext
 
 ATK_RANGE = range(0, 4)
 EITHER_ORDER = 2

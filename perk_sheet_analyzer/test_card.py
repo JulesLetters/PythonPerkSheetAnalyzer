@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from deck_analyzer.cards import minus_2, minus_1, plus_0, plus_1, plus_2, _minus_2_atk, \
+from perk_sheet_analyzer.cards import minus_2, minus_1, plus_0, plus_1, plus_2, _minus_2_atk, \
     Card, _plus_2_atk, _minus_1_atk, _plus_0_atk, _plus_1_atk, times_2, times_0
 
 minus_2_s_x = Card(_minus_2_atk, False, singular_effect="X")

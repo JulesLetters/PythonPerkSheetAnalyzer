@@ -4,7 +4,7 @@ from typing import List, Callable, Dict, Iterable, NamedTuple
 
 from multiset import FrozenMultiset
 
-import deck_analyzer.cards as cards
+import perk_sheet_analyzer.cards as cards
 
 _default_deck = [cards.plus_0] * 6 + [cards.plus_1] * 5 + [cards.minus_1] * 5 + \
                 [cards.minus_2, cards.plus_2, cards.times_0, cards.times_2]

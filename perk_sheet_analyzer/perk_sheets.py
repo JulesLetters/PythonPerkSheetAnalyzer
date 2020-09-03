@@ -1,4 +1,4 @@
-import deck_analyzer.perks as perks
+import perk_sheet_analyzer.perks as perks
 
 brute = [
     perks.remo_two_minus_1,

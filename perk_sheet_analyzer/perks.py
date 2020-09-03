@@ -1,6 +1,6 @@
 from typing import List
 
-import deck_analyzer.cards as cards
+import perk_sheet_analyzer.cards as cards
 
 Deck = List[cards.Card]
 

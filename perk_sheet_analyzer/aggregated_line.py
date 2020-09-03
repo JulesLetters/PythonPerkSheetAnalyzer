@@ -2,7 +2,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import List, Dict, Iterable
 
-from deck_analyzer.cards import Card, AtkBonus
+from perk_sheet_analyzer.cards import Card, AtkBonus
 
 
 @dataclass

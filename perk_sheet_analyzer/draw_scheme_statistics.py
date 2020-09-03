@@ -1,7 +1,7 @@
 from collections import defaultdict
 from fractions import Fraction
 
-from deck_analyzer.aggregated_line import AggregatedLine
+from perk_sheet_analyzer.aggregated_line import AggregatedLine
 
 
 class DrawSchemeStatistics:
