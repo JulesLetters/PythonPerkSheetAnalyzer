@@ -62,29 +62,12 @@ def derive_statistics(deck: FrozenMultiset, atk_range: range) -> Dict[int, DeckS
         statistics.advantage.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds)
         statistics.normal.add_aggregated_line(terminated_line.aggregated_line, terminated_line.odds)
 
-    # Split between critical and non-critical terminators.
-    # Critical x Non-critical are mixed in the double terminal section.
-    critical_terminators = [c for c in terminator_cards if c.is_critical]
-    non_critical_terminators = [c for c in terminator_cards if not c.is_critical]
-
-    # Avoid doing pointless iterations of comparing x2. This won't happen without bless, shuffles, or redraws.
-    critical_terminator_count = len(critical_terminators)
-    any_critical_card = critical_terminators[0]
-    if critical_terminator_count > 1:
-        double_critical_odds = Fraction(critical_terminator_count * (critical_terminator_count - 1), deck_length)
-        al = AggregatedLine.from_card(any_critical_card)
-        statistics.advantage.add_aggregated_line(al, double_critical_odds)
-
     two_card_odds_factor = Fraction(1, deck_length * (deck_length - 1))
-    advantaged_terminator_pairs = list(itertools.combinations(non_critical_terminators, 2))
+    advantaged_terminator_pairs = list(itertools.combinations(terminator_cards, 2))
     deck_statistics_by_atk = {}
     for atk in atk_range:
         new_statistics = DeckStatistics(statistics.normal.make_copy(), statistics.advantage.make_copy())
         for terminator_pair in advantaged_terminator_pairs:
-            add_terminal_adv_to_stats(new_statistics.advantage, terminator_pair, atk, two_card_odds_factor)
-
-        for terminator in non_critical_terminators:
-            terminator_pair = (any_critical_card, terminator)
             add_terminal_adv_to_stats(new_statistics.advantage, terminator_pair, atk, two_card_odds_factor)
 
         deck_statistics_by_atk[atk] = new_statistics
